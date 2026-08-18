@@ -2,11 +2,10 @@ import uuid
 from typing import List
 
 from sqlalchemy import JSON, Column, ForeignKey, Integer, String, Table, Text
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.models.base import Base
 
-class Base(DeclarativeBase):
-    pass
 
 
 # Tabela Associativa N:M entre Disciplina e Tecnologia
