@@ -39,3 +39,5 @@ class Usuario(Base):
         default=False,
         nullable=False,
     )
+    
+ 

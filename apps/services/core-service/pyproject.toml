@@ -20,7 +20,8 @@ pydantic-settings = "^2.2.1"
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 bcrypt = "^4.1.2"
 uuid6 = "^2025.0.1"
-
+PyJWT = "^2.8.0"
+email-validator = "^2.2.0"
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.3.0"
 pytest = "^8.0.0"
