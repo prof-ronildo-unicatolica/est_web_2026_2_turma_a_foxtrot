@@ -123,14 +123,91 @@ export default function App() {
             </div>
 
             {/* Conteúdo Principal */}
-            <div className="col-md-9" id="tutorial-components">
-              <ProfessorProfile professor={data.professor} />
-              <DisciplinasList disciplinas={data.disciplinas} />
-              <StacksTable stacks={data.stacks} />
-              <ImageAndCarousel />
-              <VideoComponent />
-              <InteractiveExamples />
-            </div>
+            {/* Conteúdo Principal */}
+<div className="col-md-9" id="buscar-hoteis">
+  <div className="card shadow-sm">
+    <div className="card-body p-4">
+      <h2 className="h4 text-primary fw-bold mb-4">
+        Buscar Hotéis
+      </h2>
+
+      <form>
+        <div className="row g-3">
+
+          <div className="col-md-4">
+            <label htmlFor="cidade" className="form-label">
+              Cidade
+            </label>
+            <select id="cidade" className="form-select">
+              <option value="">Selecione uma cidade</option>
+              <option value="fortaleza">Fortaleza</option>
+              <option value="quixada">Quixadá</option>
+              <option value="caninde">Canindé</option>
+            </select>
+          </div>
+
+          <div className="col-md-4">
+            <label htmlFor="checkin" className="form-label">
+              Check-in
+            </label>
+            <input
+              type="date"
+              id="checkin"
+              className="form-control"
+            />
+          </div>
+
+          <div className="col-md-4">
+            <label htmlFor="checkout" className="form-label">
+              Check-out
+            </label>
+            <input
+              type="date"
+              id="checkout"
+              className="form-control"
+            />
+          </div>
+
+          <div className="col-md-4">
+            <label htmlFor="adultos" className="form-label">
+              Adultos
+            </label>
+            <input
+              type="number"
+              id="adultos"
+              min="1"
+              defaultValue="1"
+              className="form-control"
+            />
+          </div>
+
+          <div className="col-md-4">
+            <label htmlFor="criancas" className="form-label">
+              Crianças
+            </label>
+            <input
+              type="number"
+              id="criancas"
+              min="0"
+              defaultValue="0"
+              className="form-control"
+            />
+          </div>
+
+          <div className="col-md-4 d-flex align-items-end">
+            <button
+              type="button"
+              className="btn btn-primary w-100"
+            >
+              Buscar Hotéis
+            </button>
+          </div>
+
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
           </div>
         )}
 
