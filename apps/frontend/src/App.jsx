@@ -12,6 +12,14 @@ export default function App() {
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
 
+  const [filtros, setFiltros] = useState({
+  cidade: '',
+  checkin: '',
+  checkout: '',
+  adultos: 1,
+  criancas: 0,
+  })
+
   useEffect(() => {
     fetch('http://localhost:8000/api/v1/sobre')
       .then((res) => {
@@ -29,6 +37,21 @@ export default function App() {
         setLoading(false)
       })
   }, [])
+
+  function handleFiltroChange(event) {
+  const { name, value } = event.target
+
+  setFiltros({
+    ...filtros,
+    [name]: value,
+  })
+  }
+
+  function handleBuscarHoteis(event) {
+    event.preventDefault()
+
+    console.log('Filtros da busca:', filtros)
+  }
 
   return (
     <div className="bg-light min-vh-100 pb-5">
@@ -82,7 +105,7 @@ export default function App() {
           <hr className="my-4" />
           <div className="row g-3">
             <div className="col-md-3 col-sm-6">
-              <strong>Equipe:</strong> <span className="text-secondary ms-1">{data?.equipe || 'Alpha'}</span>
+              <strong>Equipe:</strong> <span className="text-secondary ms-1">Foxtrot</span>
             </div>
             <div className="col-md-3 col-sm-6">
               <strong>Professor:</strong> <span className="text-secondary ms-1">{data?.professor?.nome || 'Ronildo Silva'}</span>
@@ -131,14 +154,21 @@ export default function App() {
         Buscar Hotéis
       </h2>
 
-      <form>
+      <form onSubmit={handleBuscarHoteis}>
         <div className="row g-3">
 
           <div className="col-md-4">
             <label htmlFor="cidade" className="form-label">
               Cidade
             </label>
-            <select id="cidade" className="form-select">
+            
+            <select
+              id="cidade"
+              name="cidade"
+              className="form-select"
+              value={filtros.cidade}
+              onChange={handleFiltroChange}
+            >
               <option value="">Selecione uma cidade</option>
               <option value="fortaleza">Fortaleza</option>
               <option value="quixada">Quixadá</option>
@@ -150,11 +180,16 @@ export default function App() {
             <label htmlFor="checkin" className="form-label">
               Check-in
             </label>
+
             <input
               type="date"
               id="checkin"
+              name="checkin"
               className="form-control"
+              value={filtros.checkin}
+              onChange={handleFiltroChange}
             />
+
           </div>
 
           <div className="col-md-4">
@@ -164,7 +199,10 @@ export default function App() {
             <input
               type="date"
               id="checkout"
+              name="checkout"
               className="form-control"
+              value={filtros.checkout}
+              onChange={handleFiltroChange}
             />
           </div>
 
@@ -175,9 +213,11 @@ export default function App() {
             <input
               type="number"
               id="adultos"
+              name="adultos"
               min="1"
-              defaultValue="1"
               className="form-control"
+              value={filtros.adultos}
+              onChange={handleFiltroChange}
             />
           </div>
 
@@ -188,15 +228,17 @@ export default function App() {
             <input
               type="number"
               id="criancas"
+              name="criancas"
               min="0"
-              defaultValue="0"
               className="form-control"
+              value={filtros.criancas}
+              onChange={handleFiltroChange}
             />
           </div>
 
           <div className="col-md-4 d-flex align-items-end">
             <button
-              type="button"
+              type="submit"
               className="btn btn-primary w-100"
             >
               Buscar Hotéis
@@ -212,7 +254,9 @@ export default function App() {
         )}
 
         <footer className="mt-5 py-4 border-top text-center text-muted">
-          <p className="mb-0">&copy; {new Date().getFullYear()} - Disciplina de Estágio II. Desenvolvido pela Equipe {data?.equipe || 'Alpha'}.</p>
+          <p className="mb-0">
+            &copy; {new Date().getFullYear()} - Disciplina de Estágio II. Desenvolvido pela Equipe Foxtrot.
+          </p>
         </footer>
       </div>
     </div>
