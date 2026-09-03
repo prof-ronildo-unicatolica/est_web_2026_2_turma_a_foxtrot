@@ -1,38 +1,69 @@
-"""Rotas de autenticacao/autorizacao - VERSAO BASICA (placeholder).
-
-⚠️ Implementacao simplificada (if/else, sem hash, sem JWT) para o exemplo
-base funcionar. A versao completa e a ATIVIDADE DA SPRINT 2:
-    docs/02_engenharia_software/atividade_auth_sprint2.md
-"""
-
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
 
-from app.api.deps import autenticar_credenciais, get_current_admin, get_current_user
-from app.schemas.usuario import LoginRequest, Token, UsuarioPublic
+from app.api.deps import get_current_user
+from app.core.database import get_db
+from app.schemas.usuario import (
+    LoginRequest,
+    RegisterRequest,
+    Token,
+    UsuarioPublic,
+)
+from app.services.auth_service import AuthService
 
-router = APIRouter(prefix="/auth", tags=["Auth (basico)"])
+router = APIRouter(prefix="/auth", tags=["Auth"])
+
+
+@router.post(
+    "/register",
+    response_model=UsuarioPublic,
+    status_code=status.HTTP_201_CREATED,
+)
+def register(
+    payload: RegisterRequest,
+    db: Session = Depends(get_db),
+):
+    service = AuthService(db)
+
+    try:
+        usuario = service.register(
+            nome=payload.nome,
+            email=payload.email,
+            senha=payload.senha,
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
+        ) from exc
+
+    return usuario
 
 
 @router.post("/login", response_model=Token)
-def login(payload: LoginRequest):
-    """Login basico: valida as credenciais e devolve um 'token'."""
-    usuario = autenticar_credenciais(payload.email, payload.senha)
-    if usuario is None:
+def login(
+    payload: LoginRequest,
+    db: Session = Depends(get_db),
+):
+    service = AuthService(db)
+
+    token = service.login(
+        email=payload.email,
+        senha=payload.senha,
+    )
+
+    if token is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="E-mail ou senha incorretos",
+            headers={"WWW-Authenticate": "Bearer"},
         )
-    # VERSAO BASICA: o "token" e apenas o e-mail. Na Sprint 2 sera um JWT.
-    return Token(access_token=usuario["email"])
+
+    return Token(access_token=token)
 
 
 @router.get("/me", response_model=UsuarioPublic)
-def get_me(usuario_atual: dict = Depends(get_current_user)):
-    """Rota protegida: retorna o perfil do usuario autenticado."""
+def get_me(
+    usuario_atual=Depends(get_current_user),
+):
     return usuario_atual
-
-
-@router.get("/admin/verificacao")
-def somente_admin(admin: dict = Depends(get_current_admin)):
-    """Rota administrativa de exemplo (autorizacao por is_admin)."""
-    return {"mensagem": f"Acesso administrativo concedido para {admin['nome']}"}
