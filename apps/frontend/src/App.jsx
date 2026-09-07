@@ -18,6 +18,7 @@ export default function App() {
   checkout: '',
   adultos: 1,
   criancas: 0,
+  estrelas: '',
   })
 
   useEffect(() => {
@@ -234,6 +235,27 @@ export default function App() {
               value={filtros.criancas}
               onChange={handleFiltroChange}
             />
+          </div>
+
+          <div className="col-md-4">
+            <label htmlFor="estrelas" className="form-label">
+              Estrelas
+            </label>
+
+            <select
+              id="estrelas"
+              name="estrelas"
+              className="form-select"
+              value={filtros.estrelas}
+              onChange={handleFiltroChange}
+            >
+              <option value="">Todas as categorias</option>
+              <option value="1">⭐ 1 estrela</option>
+              <option value="2">⭐⭐ 2 estrelas</option>
+              <option value="3">⭐⭐⭐ 3 estrelas</option>
+              <option value="4">⭐⭐⭐⭐ 4 estrelas</option>
+              <option value="5">⭐⭐⭐⭐⭐ 5 estrelas</option>
+            </select>
           </div>
 
           <div className="col-md-4 d-flex align-items-end">
