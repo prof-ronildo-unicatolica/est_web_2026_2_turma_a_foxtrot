@@ -1,3 +1,4 @@
+import { Routes, Route, Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import ProfessorProfile from './components/ProfessorProfile'
 import DisciplinasList from './components/DisciplinasList'
@@ -6,8 +7,9 @@ import ImageAndCarousel from './components/ImageAndCarousel'
 import Sidebar from './components/Sidebar'
 import VideoComponent from './components/VideoComponent'
 import InteractiveExamples from './components/InteractiveExamples'
+import AuthForm from './components/AuthForm'
 
-export default function App() {
+function HomePage() {
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -137,9 +139,12 @@ export default function App() {
               </li>
             </ul>
             <div className="d-flex align-items-center gap-2">
-              <button className="btn btn-outline-primary btn-sm px-3" type="button">
+              <Link
+                to="/login"
+                className="btn btn-outline-primary btn-sm px-3"
+              >
                 Login
-              </button>
+              </Link>
               <button className="btn btn-primary btn-sm px-3" type="button">
                 Perfil
               </button>
@@ -210,6 +215,7 @@ export default function App() {
             {/* Conteúdo Principal */}
             {/* Conteúdo Principal */}
 <div className="col-md-9" id="buscar-hoteis">
+
   <div className="card shadow-sm">
     <div className="card-body p-4">
       <h2 className="h4 text-primary fw-bold mb-4">
@@ -444,5 +450,13 @@ export default function App() {
         </footer>
       </div>
     </div>
+  )
+}
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/login" element={<AuthForm />} />
+    </Routes>
   )
 }
