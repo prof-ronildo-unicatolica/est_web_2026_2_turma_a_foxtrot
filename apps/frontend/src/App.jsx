@@ -21,6 +21,65 @@ export default function App() {
   estrelas: '',
   })
 
+  const [mostrarResultados, setMostrarResultados] = useState(false)
+
+  const [hotelSelecionado, setHotelSelecionado] = useState(null)
+
+  const hoteis = [
+    {
+      id: 1,
+      nome: 'Hotel Praia Azul',
+      estrelas: 4,
+      preco: 200,
+      avaliacao: 4.5,
+      comodidades: ['Wi-Fi', 'Piscina', 'Estacionamento'],
+      quartos: [
+        {
+          numero: 101,
+          tipo: 'Casal',
+          preco: 200,
+          capacidade: 'Até 2 adultos e 1 criança',
+        },
+        {
+          numero: 102,
+          tipo: 'Família',
+          preco: 320,
+          capacidade: 'Até 4 adultos e 2 crianças',
+        },
+      ],
+    },
+    {
+      id: 2,
+      nome: 'Vila dos Ventos Resort',
+      estrelas: 5,
+      preco: 400,
+      avaliacao: 4.8,
+      comodidades: ['Wi-Fi', 'Piscina', 'Academia', 'Restaurante'],
+      quartos: [
+        {
+          numero: 201,
+          tipo: 'Casal Luxo',
+          preco: 400,
+          capacidade: 'Até 2 adultos e 2 crianças',
+        },
+        {
+          numero: 202,
+          tipo: 'Família Premium',
+          preco: 550,
+          capacidade: 'Até 4 adultos e 2 crianças',
+        },
+      ],
+    },
+  ]
+
+  const hoteisFiltrados = hoteis.filter((hotel) => {
+    if (!filtros.estrelas) {
+      return true
+    }
+
+    return hotel.estrelas === Number(filtros.estrelas)
+  })
+
   useEffect(() => {
     fetch('http://localhost:8000/api/v1/sobre')
       .then((res) => {
@@ -52,6 +111,8 @@ export default function App() {
     event.preventDefault()
 
     console.log('Filtros da busca:', filtros)
+
+    setMostrarResultados(true)
   }
 
   return (
@@ -270,6 +331,107 @@ export default function App() {
         </div>
       </form>
     </div>
+    {mostrarResultados && (
+    <div className="mt-4">
+      <h3 className="h5 text-primary fw-bold mb-3 ms-3">
+        HOTÉIS ENCONTRADOS
+      </h3>
+          {hoteisFiltrados.map((hotel) => (
+      <div key={hotel.id} className="card shadow-sm mb-3">
+        <div className="card-body">
+          <h4 className="h5 mb-2">
+            {hotel.nome}
+          </h4>
+
+          <p className="mb-2">
+            {'⭐'.repeat(hotel.estrelas)}
+          </p>
+
+          <p className="mb-3">
+            Diária a partir de{' '}
+            <strong>
+              R$ {hotel.preco.toFixed(2).replace('.', ',')}
+            </strong>
+          </p>
+
+          <button
+            type="button"
+            className="btn btn-outline-primary"
+            onClick={() => setHotelSelecionado(hotel)}
+          >
+            Ver Detalhes do Hotel
+          </button>
+        </div>
+      </div>
+    ))}
+      
+        {hotelSelecionado && (
+          <div className="card shadow-sm mt-4">
+            <div className="card-body p-4">
+              <h2 className="h4 text-primary fw-bold mb-2">
+                {hotelSelecionado.nome}
+              </h2>
+
+              <p className="mb-2">
+                {'⭐'.repeat(hotelSelecionado.estrelas)}
+              </p>
+
+              <p className="mb-3">
+                Avaliação média: <strong>{hotelSelecionado.avaliacao} / 5</strong>
+              </p>
+
+              <h3 className="h6 fw-bold">
+                Comodidades
+              </h3>
+
+              <div className="mb-4">
+                {hotelSelecionado.comodidades.map((comodidade) => (
+                  <span
+                    key={comodidade}
+                    className="badge bg-secondary me-2 mb-2"
+                  >
+                    {comodidade}
+                  </span>
+                ))}
+              </div>
+
+              <h3 className="h5 text-primary fw-bold mb-3">
+                Quartos disponíveis
+              </h3>
+
+              {hotelSelecionado.quartos.map((quarto) => (
+                <div
+                  key={quarto.numero}
+                  className="border rounded p-3 mb-3"
+                >
+                  <h4 className="h6 fw-bold">
+                    Quarto {quarto.numero} - {quarto.tipo}
+                  </h4>
+
+                  <p className="mb-1">
+                    {quarto.capacidade}
+                  </p>
+
+                  <p className="mb-3">
+                    Diária: <strong>
+                      R$ {quarto.preco.toFixed(2).replace('.', ',')}
+                    </strong>
+                  </p>
+
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                  >
+                    Reservar
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+    )}  
+
+    </div>
+  )}
   </div>
 </div>
           </div>
