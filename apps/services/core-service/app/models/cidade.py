@@ -8,7 +8,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.uuid_utils import gerar_uuid7
 from app.models.base import Base
 
-
 if TYPE_CHECKING:
     from app.models.hotel import Hotel
 
@@ -24,11 +23,7 @@ class Cidade(Base):
 
     nome: Mapped[str] = mapped_column(
         String(100),
-        nullable=False,
-    )
-
-    estado: Mapped[str] = mapped_column(
-        String(100),
+        unique=True,
         nullable=False,
     )
 
