@@ -1,3 +1,4 @@
+from app.repositories.hotel_repository import CidadeRepository
 from app.repositories.tutorial_repository import TutorialRepository
 
 
@@ -27,6 +28,56 @@ def test_get_professor_by_id_in_repository(db_session):
     )
 
     fetched_prof = repo.get_professor_by_id(created_prof.id)
+
     assert fetched_prof is not None
     assert fetched_prof.id == created_prof.id
     assert fetched_prof.nome == "Outro Prof"
+
+
+def test_create_cidade_in_repository(db_session):
+    repo = CidadeRepository(db_session)
+
+    cidade = repo.create(nome="Fortaleza")
+
+    assert cidade.id is not None
+    assert cidade.nome == "Fortaleza"
+
+
+def test_list_cidades_in_repository(db_session):
+    repo = CidadeRepository(db_session)
+
+    repo.create(nome="Recife")
+    repo.create(nome="Fortaleza")
+    repo.create(nome="Salvador")
+
+    cidades = repo.list()
+
+    assert len(cidades) == 3
+    assert [cidade.nome for cidade in cidades] == [
+        "Fortaleza",
+        "Recife",
+        "Salvador",
+    ]
+
+
+def test_get_cidade_by_id_in_repository(db_session):
+    repo = CidadeRepository(db_session)
+
+    created_cidade = repo.create(nome="Fortaleza")
+
+    cidade = repo.get_by_id(created_cidade.id)
+
+    assert cidade is not None
+    assert cidade.id == created_cidade.id
+    assert cidade.nome == "Fortaleza"
+
+
+def test_get_cidade_by_nome_in_repository(db_session):
+    repo = CidadeRepository(db_session)
+
+    repo.create(nome="Fortaleza")
+
+    cidade = repo.get_by_nome("Fortaleza")
+
+    assert cidade is not None
+    assert cidade.nome == "Fortaleza"
