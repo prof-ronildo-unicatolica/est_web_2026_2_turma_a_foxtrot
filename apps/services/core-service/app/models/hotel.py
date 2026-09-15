@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -19,7 +19,17 @@ class Hotel(Base):
     )
 
     nome: Mapped[str] = mapped_column(
-        String(100),
+        String(150),
+        nullable=False,
+    )
+
+    estrelas: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+    )
+
+    endereco: Mapped[str] = mapped_column(
+        String(255),
         nullable=False,
     )
 
