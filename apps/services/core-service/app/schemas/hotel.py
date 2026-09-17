@@ -5,7 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class CidadeCreateSchema(BaseModel):
-    nome: str
+    nome: str = Field(min_length=1)
 
 
 class CidadeResponseSchema(BaseModel):
