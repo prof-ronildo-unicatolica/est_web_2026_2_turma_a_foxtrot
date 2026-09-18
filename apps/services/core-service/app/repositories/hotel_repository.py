@@ -40,14 +40,10 @@ class HotelRepository:
     def create(
         self,
         nome: str,
-        estrelas: int,
-        endereco: str,
         cidade_id,
     ) -> Hotel:
         hotel = Hotel(
             nome=nome,
-            estrelas=estrelas,
-            endereco=endereco,
             cidade_id=cidade_id,
         )
         self.db.add(hotel)
