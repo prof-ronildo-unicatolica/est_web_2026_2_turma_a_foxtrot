@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user
+from app.api.deps import get_current_admin, get_current_user
 from app.core.database import get_db
 from app.schemas.usuario import (
     LoginRequest,
@@ -67,3 +67,12 @@ def get_me(
     usuario_atual=Depends(get_current_user),
 ):
     return usuario_atual
+
+@router.get("/admin/verificacao")
+def admin_verificacao(
+    usuario_admin=Depends(get_current_admin),
+):
+    return {
+        "mensagem": "Acesso administrativo autorizado",
+        "email": usuario_admin.email,
+    }
