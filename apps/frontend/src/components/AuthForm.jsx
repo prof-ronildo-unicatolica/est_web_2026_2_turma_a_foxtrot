@@ -3,63 +3,97 @@ import { useState } from 'react'
 export default function AuthForm() {
   const [modo, setModo] = useState('login')
 
-  const [login, setLogin] = useState({
-  email: '',
-  senha: '',
-  })
+  const [email, setEmail] = useState('')
+  const [senha, setSenha] = useState('')
 
-  const [cadastro, setCadastro] = useState({
-    nome: '',
-    email: '',
-    senha: '',
-    confirmarSenha: '',
-  })
+  const [nome, setNome] = useState('')
+  const [confirmarSenha, setConfirmarSenha] = useState('')
 
   const [mensagem, setMensagem] = useState('')
 
-  const [tipoMensagem, setTipoMensagem] = useState('')
-
-  function handleCadastroSubmit(event) {
+  async function handleLogin(event) {
     event.preventDefault()
 
-    if (
-      !cadastro.nome ||
-      !cadastro.email ||
-      !cadastro.senha ||
-      !cadastro.confirmarSenha
-    ) {
-      setMensagem('Preencha todos os campos.')
-      setTipoMensagem('erro')
+    if (!email || !senha) {
+      setMensagem('Preencha e-mail e senha.')
       return
     }
 
-    if (cadastro.senha !== cadastro.confirmarSenha) {
-      setMensagem('As senhas não coincidem.')
-      setTipoMensagem('erro')
-      return
-    }
+    try {
+      const resposta = await fetch(
+        'http://127.0.0.1:8000/api/v1/auth/login',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: email,
+            senha: senha,
+          }),
+        }
+      )
 
-    setMensagem('Cadastro preenchido corretamente.')
-    setTipoMensagem('sucesso')
+      const dados = await resposta.json()
+
+      if (!resposta.ok) {
+        setMensagem(dados.detail || 'Erro ao fazer login.')
+        return
+      }
+
+      localStorage.setItem('access_token', dados.access_token)
+
+      setMensagem('Login realizado com sucesso!')
+    } catch (erro) {
+      setMensagem('Não foi possível conectar ao servidor.')
+    }
   }
 
-  function handleLoginSubmit(event) {
+  async function handleCadastro(event) {
     event.preventDefault()
 
-    if (!login.email || !login.senha) {
-      setMensagem('Preencha e-mail e senha.')
-      setTipoMensagem('erro')
+    if (!nome || !email || !senha || !confirmarSenha) {
+      setMensagem('Preencha todos os campos.')
       return
     }
 
-    if (!login.email.includes('@')) {
-      setMensagem('Digite um e-mail válido.')
-      setTipoMensagem('erro')
+    if (senha !== confirmarSenha) {
+      setMensagem('As senhas não coincidem.')
       return
     }
 
-    setMensagem('Login preenchido corretamente.')
-    setTipoMensagem('sucesso')
+    try {
+      const resposta = await fetch(
+        'http://127.0.0.1:8000/api/v1/auth/register',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            nome: nome,
+            email: email,
+            senha: senha,
+          }),
+        }
+      )
+
+      const dados = await resposta.json()
+
+      if (!resposta.ok) {
+        setMensagem(dados.detail || 'Erro ao realizar cadastro.')
+        return
+      }
+
+      setMensagem('Cadastro realizado com sucesso!')
+
+      setNome('')
+      setEmail('')
+      setSenha('')
+      setConfirmarSenha('')
+    } catch (erro) {
+      setMensagem('Não foi possível conectar ao servidor.')
+    }
   }
 
   return (
@@ -72,184 +106,157 @@ export default function AuthForm() {
         <div className="btn-group w-100 mb-4">
           <button
             type="button"
-            className={`btn ${
+            className={
               modo === 'login'
-                ? 'btn-primary'
-                : 'btn-outline-primary'
-            }`}
-            onClick={() => setModo('login')}
+                ? 'btn btn-primary'
+                : 'btn btn-outline-primary'
+            }
+            onClick={() => {
+              setModo('login')
+              setMensagem('')
+            }}
           >
             Login
           </button>
 
           <button
             type="button"
-            className={`btn ${
+            className={
               modo === 'cadastro'
-                ? 'btn-primary'
-                : 'btn-outline-primary'
-            }`}
-            onClick={() => setModo('cadastro')}
+                ? 'btn btn-primary'
+                : 'btn btn-outline-primary'
+            }
+            onClick={() => {
+              setModo('cadastro')
+              setMensagem('')
+            }}
           >
             Cadastro
           </button>
         </div>
 
-       {modo === 'login' && (
-        <form onSubmit={handleLoginSubmit}>
-          <div className="mb-3">
-            <label htmlFor="emailLogin" className="form-label">
-              E-mail
-            </label>
+        {modo === 'login' && (
+          <form onSubmit={handleLogin}>
+            <div className="mb-3">
+              <label htmlFor="emailLogin" className="form-label">
+                E-mail
+              </label>
 
-            <input
-              type="email"
-              id="emailLogin"
-              className="form-control"
-              placeholder="Digite seu e-mail"
-              value={login.email}
-              onChange={(event) =>
-              setLogin({
-                ...login,
-                email: event.target.value,
-              })
-            }
-            />
+              <input
+                type="email"
+                id="emailLogin"
+                className="form-control"
+                placeholder="Digite seu e-mail"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+              />
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="senhaLogin" className="form-label">
+                Senha
+              </label>
+
+              <input
+                type="password"
+                id="senhaLogin"
+                className="form-control"
+                placeholder="Digite sua senha"
+                value={senha}
+                onChange={(event) => setSenha(event.target.value)}
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="btn btn-primary w-100"
+            >
+              Entrar
+            </button>
+          </form>
+        )}
+
+        {modo === 'cadastro' && (
+          <form onSubmit={handleCadastro}>
+            <div className="mb-3">
+              <label htmlFor="nomeCadastro" className="form-label">
+                Nome
+              </label>
+
+              <input
+                type="text"
+                id="nomeCadastro"
+                className="form-control"
+                placeholder="Digite seu nome"
+                value={nome}
+                onChange={(event) => setNome(event.target.value)}
+              />
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="emailCadastro" className="form-label">
+                E-mail
+              </label>
+
+              <input
+                type="email"
+                id="emailCadastro"
+                className="form-control"
+                placeholder="Digite seu e-mail"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+              />
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="senhaCadastro" className="form-label">
+                Senha
+              </label>
+
+              <input
+                type="password"
+                id="senhaCadastro"
+                className="form-control"
+                placeholder="Digite sua senha"
+                value={senha}
+                onChange={(event) => setSenha(event.target.value)}
+              />
+            </div>
+
+            <div className="mb-3">
+              <label
+                htmlFor="confirmarSenhaCadastro"
+                className="form-label"
+              >
+                Confirmar Senha
+              </label>
+
+              <input
+                type="password"
+                id="confirmarSenhaCadastro"
+                className="form-control"
+                placeholder="Confirme sua senha"
+                value={confirmarSenha}
+                onChange={(event) =>
+                  setConfirmarSenha(event.target.value)
+                }
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="btn btn-primary w-100"
+            >
+              Cadastrar
+            </button>
+          </form>
+        )}
+
+        {mensagem && (
+          <div className="alert alert-info mt-3">
+            {mensagem}
           </div>
-
-          <div className="mb-3">
-            <label htmlFor="senhaLogin" className="form-label">
-              Senha
-            </label>
-
-            <input
-            type="password"
-            id="senhaLogin"
-            className="form-control"
-            placeholder="Digite sua senha"
-            value={login.senha}
-            onChange={(event) =>
-              setLogin({
-                ...login,
-                senha: event.target.value,
-              })
-            }
-          />
-          </div>
-
-          <button
-            type="submit"
-            className="btn btn-primary w-100"
-          >
-            Entrar
-          </button>           
-        </form>
-      )}
-
-      {mensagem && (
-        <div
-          className={`alert ${
-            tipoMensagem === 'sucesso'
-              ? 'alert-success'
-              : 'alert-danger'
-          }`}
-          role="alert"
-        >
-          {mensagem}
-        </div>
-      )}
-
-      {modo === 'cadastro' && (
-        <form onSubmit={handleCadastroSubmit}>
-          <div className="mb-3">
-            <label htmlFor="nomeCadastro" className="form-label">
-              Nome
-            </label>
-
-            <input
-            type="text"
-            id="nomeCadastro"
-            className="form-control"
-            placeholder="Digite seu nome"
-            value={cadastro.nome}
-            onChange={(event) =>
-              setCadastro({
-                ...cadastro,
-                nome: event.target.value,
-              })
-            }
-          />
-          </div>
-
-          <div className="mb-3">
-            <label htmlFor="emailCadastro" className="form-label">
-              E-mail
-            </label>
-
-            <input
-            type="email"
-            id="emailCadastro"
-            className="form-control"
-            placeholder="Digite seu e-mail"
-            value={cadastro.email}
-            onChange={(event) =>
-              setCadastro({
-                ...cadastro,
-                email: event.target.value,
-              })
-            }
-          />
-          </div>
-
-          <div className="mb-3">
-            <label htmlFor="senhaCadastro" className="form-label">
-              Senha
-            </label>
-
-            <input
-            type="password"
-            id="senhaCadastro"
-            className="form-control"
-            placeholder="Digite sua senha"
-            value={cadastro.senha}
-            onChange={(event) =>
-              setCadastro({
-                ...cadastro,
-                senha: event.target.value,
-              })
-            }
-          />
-          </div>
-
-          <div className="mb-3">
-            <label htmlFor="confirmarSenhaCadastro" className="form-label">
-              Confirmar Senha
-            </label>
-
-            <input
-            type="password"
-            id="confirmarSenhaCadastro"
-            className="form-control"
-            placeholder="Confirme sua senha"
-            value={cadastro.confirmarSenha}
-            onChange={(event) =>
-              setCadastro({
-                ...cadastro,
-                confirmarSenha: event.target.value,
-              })
-            }
-          />
-          </div>
-
-          <button
-            type="submit"
-            className="btn btn-primary w-100"
-          >
-            Cadastrar
-          </button>
-        </form>
-      )}
-      
+        )}
       </div>
     </div>
   )
