@@ -6,16 +6,21 @@ from app.repositories.hotel_repository import CidadeRepository, HotelRepository
 
 # --- Excecoes de dominio -----------------------------------------------------
 
+
 class RegraDeNegocioError(Exception):
     """Base de todas as excecoes de negocio deste modulo."""
+
 
 class CidadeJaExisteError(RegraDeNegocioError):
     pass
 
+
 class CidadeNaoEncontradaError(RegraDeNegocioError):
     pass
 
+
 # --- Services ----------------------------------------------------------------
+
 
 class CidadeService:
     def __init__(self, db: Session):
@@ -43,8 +48,6 @@ class HotelService:
     def criar(
         self,
         nome: str,
-        estrelas: int,
-        endereco: str,
         cidade_id,
     ) -> Hotel:
         nome = nome.strip()
@@ -56,8 +59,6 @@ class HotelService:
 
         return self.repository.create(
             nome=nome,
-            estrelas=estrelas,
-            endereco=endereco,
             cidade_id=cidade_id,
         )
 
