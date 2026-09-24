@@ -2,17 +2,10 @@ import { Routes, Route, Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import Sidebar from './components/Sidebar'
 import AuthForm from './components/AuthForm'
-import {
-  buscarCidades,
-  buscarHoteis,
-  buscarSobre,
-} from './services/api'
+
+const API_URL = 'http://localhost:8000/api/v1'
 
 function HomePage() {
-  const [data, setData] = useState(null)
-  const [error, setError] = useState(null)
-  const [loading, setLoading] = useState(true)
-
   const [cidades, setCidades] = useState([])
   const [loadingCidades, setLoadingCidades] = useState(true)
   const [erroCidades, setErroCidades] = useState(null)
@@ -27,40 +20,9 @@ function HomePage() {
   })
 
   const [mostrarResultados, setMostrarResultados] = useState(false)
-
   const [hoteis, setHoteis] = useState([])
-  const [loadingHoteis, setLoadingHoteis] = useState(false)
   const [erroHoteis, setErroHoteis] = useState(null)
-
-  const [hotelSelecionado, setHotelSelecionado] = useState(null)
-
-  // =========================================================
-  // CARREGAR INFORMAÇÕES DO SISTEMA
-  // =========================================================
-
-  useEffect(() => {
-    async function carregarDados() {
-      try {
-        setLoading(true)
-        setError(null)
-
-        const json = await buscarSobre()
-
-        setData(json)
-      } catch (err) {
-        console.error(
-          'Erro ao carregar informações do sistema:',
-          err
-        )
-
-        setError(err.message)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    carregarDados()
-  }, [])
+  const [loadingHoteis, setLoadingHoteis] = useState(false)
 
   // =========================================================
   // CARREGAR CIDADES DA API
@@ -72,20 +34,23 @@ function HomePage() {
         setLoadingCidades(true)
         setErroCidades(null)
 
-        const json = await buscarCidades()
+        const resposta = await fetch(`${API_URL}/cidades`)
 
-        console.log(
-          'Cidades recebidas da API:',
-          json
-        )
+        if (!resposta.ok) {
+          const erro = await resposta.json().catch(() => ({}))
 
-        setCidades(Array.isArray(json) ? json : [])
+          throw new Error(
+            erro.detail || 'Não foi possível carregar as cidades.'
+          )
+        }
+
+        const json = await resposta.json()
+
+        console.log('Cidades recebidas da API:', json)
+
+        setCidades(json)
       } catch (err) {
-        console.error(
-          'Erro ao carregar cidades:',
-          err
-        )
-
+        console.error('Erro ao carregar cidades:', err)
         setErroCidades(err.message)
         setCidades([])
       } finally {
@@ -117,34 +82,55 @@ function HomePage() {
     event.preventDefault()
 
     setMostrarResultados(true)
-    setLoadingHoteis(true)
     setErroHoteis(null)
+    setLoadingHoteis(true)
     setHoteis([])
-    setHotelSelecionado(null)
 
     try {
-      console.log(
-        'Buscando hotéis para cidade:',
-        filtros.cidade || 'todas'
-      )
+      const parametros = new URLSearchParams()
 
-      const json = await buscarHoteis(
-        filtros.cidade
-      )
+      // Filtro por cidade
+      if (filtros.cidade) {
+        parametros.append('cidade_id', filtros.cidade)
+      }
 
-      console.log(
-        'Hotéis recebidos da API:',
-        json
-      )
+      // Monta a URL
+      const url = parametros.toString()
+        ? `${API_URL}/hoteis?${parametros.toString()}`
+        : `${API_URL}/hoteis`
 
-      setHoteis(
-        Array.isArray(json) ? json : []
-      )
+      console.log('Buscando hotéis em:', url)
+
+      const token = localStorage.getItem('access_token')
+
+      const headers = {
+        Accept: 'application/json',
+      }
+
+      if (token) {
+        headers.Authorization = `Bearer ${token}`
+      }
+
+      const resposta = await fetch(url, {
+        method: 'GET',
+        headers,
+      })
+
+      if (!resposta.ok) {
+        const erro = await resposta.json().catch(() => ({}))
+
+        throw new Error(
+          erro.detail || 'Não foi possível buscar os hotéis.'
+        )
+      }
+
+      const json = await resposta.json()
+
+      console.log('Hotéis recebidos da API:', json)
+
+      setHoteis(json)
     } catch (err) {
-      console.error(
-        'Erro ao buscar hotéis:',
-        err
-      )
+      console.error('Erro ao buscar hotéis:', err)
 
       setErroHoteis(err.message)
       setHoteis([])
@@ -154,21 +140,18 @@ function HomePage() {
   }
 
   // =========================================================
-  // FILTRO DE ESTRELAS
+  // FILTRO DE ESTRELAS NO FRONTEND
   // =========================================================
 
-  const hoteisFiltrados = hoteis.filter(
-    (hotel) => {
-      if (!filtros.estrelas) {
-        return true
-      }
-
-      return (
-        Number(hotel.categoria_estrelas) ===
-        Number(filtros.estrelas)
-      )
+  const hoteisFiltrados = hoteis.filter((hotel) => {
+    if (!filtros.estrelas) {
+      return true
     }
-  )
+
+    return (
+      hotel.categoria_estrelas === Number(filtros.estrelas)
+    )
+  })
 
   return (
     <div className="bg-light min-vh-100 pb-5">
@@ -229,6 +212,33 @@ function HomePage() {
                 </a>
               </li>
 
+              <li className="nav-item">
+                <a
+                  className="nav-link"
+                  href="#minhas-reservas"
+                >
+                  Minhas Reservas
+                </a>
+              </li>
+
+              <li className="nav-item">
+                <a
+                  className="nav-link"
+                  href="#perfil"
+                >
+                  Meu Perfil
+                </a>
+              </li>
+
+              <li className="nav-item">
+                <a
+                  className="nav-link"
+                  href="#administracao"
+                >
+                  Administração
+                </a>
+              </li>
+
             </ul>
 
             <div className="d-flex align-items-center gap-2">
@@ -280,9 +290,7 @@ function HomePage() {
 
               <button
                 className="btn btn-sm btn-outline-secondary"
-                onClick={() =>
-                  window.location.reload()
-                }
+                onClick={() => window.location.reload()}
               >
                 Recarregar Dados
               </button>
@@ -305,39 +313,27 @@ function HomePage() {
             <div className="col-md-3 col-sm-6">
               <strong>Professor:</strong>{' '}
               <span className="text-secondary ms-1">
-                {data?.professor?.nome ||
-                  'Ronildo Silva'}
+                Ronildo Silva
               </span>
             </div>
 
             <div className="col-md-3 col-sm-6">
               <strong>Ano:</strong>{' '}
               <span className="text-secondary ms-1">
-                {data?.ano || '2026'}
+                2026
               </span>
             </div>
 
             <div className="col-md-3 col-sm-6">
               <strong>Semestre:</strong>{' '}
               <span className="text-secondary ms-1">
-                {data?.semestre || '2'}
+                2
               </span>
             </div>
 
           </div>
 
         </header>
-
-        {/* ERRO DO BACKEND */}
-
-        {error && (
-          <div className="alert alert-danger shadow-sm">
-            <strong>
-              Erro de conexão com o backend:
-            </strong>{' '}
-            {error}
-          </div>
-        )}
 
         {/* =====================================================
             BUSCAR HOTÉIS
@@ -366,13 +362,13 @@ function HomePage() {
                   Buscar Hotéis
                 </h2>
 
-                <form
-                  onSubmit={handleBuscarHoteis}
-                >
+                <form onSubmit={handleBuscarHoteis}>
 
                   <div className="row g-3">
 
-                    {/* CIDADE */}
+                    {/* =================================================
+                        CIDADE
+                    ================================================== */}
 
                     <div className="col-md-4">
 
@@ -389,31 +385,27 @@ function HomePage() {
                         className="form-select"
                         value={filtros.cidade}
                         onChange={handleFiltroChange}
-                        disabled={loadingCidades}
                       >
+                      <option value="">
+                        Todas as cidades
+                      </option>
 
-                        <option value="">
-                          Todas as cidades
-                        </option>
+                    <option value="20000000-0000-0000-0000-000000000001">
+                      Fortaleza
+                    </option>
 
-                        {cidades.map(
-                          (cidade) => (
-                            <option
-                              key={cidade.id}
-                              value={cidade.id}
-                            >
-                              {cidade.nome}
-                            </option>
-                          )
-                        )}
+                    <option value="20000000-0000-0000-0000-000000000002">
+                      Quixadá
+                    </option>
 
-                      </select>
+                    <option value="01a0d4b0-6c3a-7f59-951c-18ae88090529">
+                      Quixeramobim
+                    </option>
 
-                      {loadingCidades && (
-                        <div className="form-text">
-                          Carregando cidades...
-                        </div>
-                      )}
+                    <option value="20000000-0000-0000-0000-000000000003">
+                      Sobral
+                    </option>
+                  </select>
 
                       {erroCidades && (
                         <div className="text-danger small mt-2">
@@ -423,7 +415,9 @@ function HomePage() {
 
                     </div>
 
-                    {/* CHECK-IN */}
+                    {/* =================================================
+                        CHECK-IN
+                    ================================================== */}
 
                     <div className="col-md-4">
 
@@ -445,7 +439,9 @@ function HomePage() {
 
                     </div>
 
-                    {/* CHECK-OUT */}
+                    {/* =================================================
+                        CHECK-OUT
+                    ================================================== */}
 
                     <div className="col-md-4">
 
@@ -467,7 +463,9 @@ function HomePage() {
 
                     </div>
 
-                    {/* ADULTOS */}
+                    {/* =================================================
+                        ADULTOS
+                    ================================================== */}
 
                     <div className="col-md-4">
 
@@ -490,7 +488,9 @@ function HomePage() {
 
                     </div>
 
-                    {/* CRIANÇAS */}
+                    {/* =================================================
+                        CRIANÇAS
+                    ================================================== */}
 
                     <div className="col-md-4">
 
@@ -513,7 +513,9 @@ function HomePage() {
 
                     </div>
 
-                    {/* ESTRELAS */}
+                    {/* =================================================
+                        ESTRELAS
+                    ================================================== */}
 
                     <div className="col-md-4">
 
@@ -565,11 +567,8 @@ function HomePage() {
                   <button
                     type="submit"
                     className="btn btn-primary mt-4 px-4"
-                    disabled={loadingHoteis}
                   >
-                    {loadingHoteis
-                      ? 'Buscando...'
-                      : 'Buscar hotéis'}
+                    Buscar hotéis
                   </button>
 
                 </form>
@@ -577,9 +576,9 @@ function HomePage() {
               </div>
             </div>
 
-            {/* =================================================
+            {/* =====================================================
                 RESULTADOS
-            ================================================== */}
+            ====================================================== */}
 
             {mostrarResultados && (
 
@@ -628,8 +627,7 @@ function HomePage() {
                       !erroHoteis &&
                       hoteisFiltrados.length === 0 && (
                         <div className="alert alert-warning">
-                          Nenhum hotel encontrado
-                          para os filtros
+                          Nenhum hotel encontrado para os filtros
                           selecionados.
                         </div>
                       )}
@@ -642,75 +640,55 @@ function HomePage() {
 
                         <div className="row g-3">
 
-                          {hoteisFiltrados.map(
-                            (hotel) => (
+                          {hoteisFiltrados.map((hotel) => (
 
-                              <div
-                                className="col-md-6"
-                                key={hotel.id}
-                              >
+                            <div
+                              className="col-md-6"
+                              key={hotel.id}
+                            >
 
-                                <div className="card h-100 border">
+                              <div className="card h-100 border">
 
-                                  <div className="card-body">
+                                <div className="card-body">
 
-                                    <h4 className="h5 fw-bold">
-                                      {hotel.nome}
-                                    </h4>
+                                  <h4 className="h5 fw-bold">
+                                    {hotel.nome}
+                                  </h4>
 
-                                    <p className="mb-2">
+                                  <p className="mb-2">
 
-                                      <span className="badge bg-primary">
-                                        {'⭐'.repeat(
-                                          Number(
-                                            hotel.categoria_estrelas
-                                          ) || 0
-                                        )}
-                                      </span>
-
-                                    </p>
-
-                                    <p className="mb-2">
-                                      <strong>
-                                        Categoria:
-                                      </strong>{' '}
-                                      {
+                                    <span className="badge bg-primary">
+                                      {'⭐'.repeat(
                                         hotel.categoria_estrelas
-                                      }{' '}
-                                      estrelas
+                                      )}
+                                    </span>
+
+                                  </p>
+
+                                  <p className="mb-2">
+                                    <strong>
+                                      Categoria:
+                                    </strong>{' '}
+                                    {hotel.categoria_estrelas}{' '}
+                                    estrelas
+                                  </p>
+
+                                  {hotel.cidade && (
+                                    <p className="text-secondary mb-0">
+                                      <strong>
+                                        Cidade:
+                                      </strong>{' '}
+                                      {hotel.cidade.nome}
                                     </p>
-
-                                    {hotel.cidade && (
-                                      <p className="text-secondary mb-3">
-                                        <strong>
-                                          Cidade:
-                                        </strong>{' '}
-                                        {
-                                          hotel.cidade.nome
-                                        }
-                                      </p>
-                                    )}
-
-                                    <button
-                                      type="button"
-                                      className="btn btn-outline-primary"
-                                      onClick={() =>
-                                        setHotelSelecionado(
-                                          hotel
-                                        )
-                                      }
-                                    >
-                                      Ver detalhes
-                                    </button>
-
-                                  </div>
+                                  )}
 
                                 </div>
 
                               </div>
 
-                            )
-                          )}
+                            </div>
+
+                          ))}
 
                         </div>
 
@@ -724,76 +702,96 @@ function HomePage() {
 
             )}
 
-            {/* =================================================
-                DETALHES DO HOTEL
-            ================================================== */}
+            {/* =====================================================
+                SEÇÕES DO MENU
+            ====================================================== */}
 
-            {hotelSelecionado && (
+            <div
+              id="minhas-reservas"
+              className="card shadow-sm mt-4"
+            >
+              <div className="card-body p-4">
+                <h3 className="h5 text-primary fw-bold">
+                  Minhas Reservas
+                </h3>
 
-              <div className="card shadow-sm mt-4">
-
-                <div className="card-body p-4">
-
-                  <div className="d-flex justify-content-between align-items-center mb-3">
-
-                    <h2 className="h4 text-primary fw-bold mb-0">
-                      {hotelSelecionado.nome}
-                    </h2>
-
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-outline-secondary"
-                      onClick={() =>
-                        setHotelSelecionado(null)
-                      }
-                    >
-                      Fechar
-                    </button>
-
-                  </div>
-
-                  <p className="mb-2">
-                    <span className="badge bg-primary">
-                      {'⭐'.repeat(
-                        Number(
-                          hotelSelecionado.categoria_estrelas
-                        ) || 0
-                      )}
-                    </span>
-                  </p>
-
-                  {hotelSelecionado.cidade && (
-                    <p className="text-secondary">
-                      <strong>
-                        Cidade:
-                      </strong>{' '}
-                      {
-                        hotelSelecionado.cidade.nome
-                      }
-                    </p>
-                  )}
-
-                  <p className="mb-0">
-                    <strong>ID:</strong>{' '}
-                    {hotelSelecionado.id}
-                  </p>
-
-                </div>
-
+                <p className="text-secondary mb-0">
+                  Área de reservas do usuário.
+                </p>
               </div>
+            </div>
 
-            )}
+            <div
+              id="perfil"
+              className="card shadow-sm mt-4"
+            >
+              <div className="card-body p-4">
+                <h3 className="h5 text-primary fw-bold">
+                  Meu Perfil
+                </h3>
+
+                <p className="text-secondary mb-0">
+                  Área do perfil do usuário.
+                </p>
+              </div>
+            </div>
+
+            <div
+              id="administracao"
+              className="card shadow-sm mt-4"
+            >
+              <div className="card-body p-4">
+                <h3 className="h5 text-primary fw-bold">
+                  Administração
+                </h3>
+
+                <p className="text-secondary mb-0">
+                  Área administrativa do sistema.
+                </p>
+              </div>
+            </div>
 
           </div>
-
         </div>
 
         {/* RODAPÉ */}
 
         <footer className="text-center text-secondary mt-5 py-4">
-          © 2026 - Disciplina de Estágio II.
-          Desenvolvido pela Equipe Foxtrot.
+          © 2026 - Disciplina de Estágio II. Desenvolvido pela Equipe
+          Foxtrot.
         </footer>
+
+      </div>
+    </div>
+  )
+}
+
+// =============================================================
+// LOGIN
+// =============================================================
+
+function LoginPage() {
+  return (
+    <div className="container py-5">
+
+      <div className="row justify-content-center">
+
+        <div className="col-md-6 col-lg-5">
+
+          <div className="mb-3">
+
+            <Link
+              to="/"
+              className="text-decoration-none"
+            >
+              ← Voltar para Home
+            </Link>
+
+          </div>
+
+          <AuthForm />
+
+        </div>
 
       </div>
 
@@ -805,7 +803,7 @@ function HomePage() {
 // APP
 // =============================================================
 
-export default function App() {
+function App() {
   return (
     <Routes>
 
@@ -816,9 +814,11 @@ export default function App() {
 
       <Route
         path="/login"
-        element={<AuthForm />}
+        element={<LoginPage />}
       />
 
     </Routes>
   )
 }
+
+export default App

@@ -2,7 +2,6 @@ from typing import TYPE_CHECKING
 from uuid import UUID
 
 from sqlalchemy import String
-from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -13,8 +12,8 @@ if TYPE_CHECKING:
     from app.models.hotel import Hotel
 
 
-class Cidade(Base):
-    __tablename__ = "cidades"
+class Comodidade(Base):
+    __tablename__ = "comodidades"
 
     id: Mapped[UUID] = mapped_column(
         PG_UUID(as_uuid=True),
@@ -28,12 +27,7 @@ class Cidade(Base):
         nullable=False,
     )
 
-    limite_territorial: Mapped[dict | None] = mapped_column(
-        JSONB,
-        nullable=True,
-    )
-
     hoteis: Mapped[list["Hotel"]] = relationship(
-        back_populates="cidade",
-        cascade="all, delete-orphan",
+        secondary="hotel_comodidades",
+        back_populates="comodidades",
     )

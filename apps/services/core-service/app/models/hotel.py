@@ -1,12 +1,34 @@
+from typing import TYPE_CHECKING
 from uuid import UUID
 
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import Column, ForeignKey, Integer, String, Table
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.uuid_utils import gerar_uuid7
 from app.models.base import Base
 from app.models.cidade import Cidade
+
+if TYPE_CHECKING:
+    from app.models.comodidade import Comodidade
+
+
+hotel_comodidades = Table(
+    "hotel_comodidades",
+    Base.metadata,
+    Column(
+        "hotel_id",
+        PG_UUID(as_uuid=True),
+        ForeignKey("hoteis.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column(
+        "comodidade_id",
+        PG_UUID(as_uuid=True),
+        ForeignKey("comodidades.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+)
 
 
 class Hotel(Base):
@@ -23,6 +45,11 @@ class Hotel(Base):
         nullable=False,
     )
 
+    categoria_estrelas: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+    )
+
     cidade_id: Mapped[UUID] = mapped_column(
         PG_UUID(as_uuid=True),
         ForeignKey("cidades.id", ondelete="CASCADE"),
@@ -31,5 +58,10 @@ class Hotel(Base):
     )
 
     cidade: Mapped["Cidade"] = relationship(
+        back_populates="hoteis",
+    )
+
+    comodidades: Mapped[list["Comodidade"]] = relationship(
+        secondary=hotel_comodidades,
         back_populates="hoteis",
     )

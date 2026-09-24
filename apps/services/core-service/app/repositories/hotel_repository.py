@@ -12,8 +12,15 @@ class CidadeRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def create(self, nome: str) -> Cidade:
-        cidade = Cidade(nome=nome)
+    def create(
+        self,
+        nome: str,
+        limite_territorial: dict | None = None,
+    ) -> Cidade:
+        cidade = Cidade(
+        nome=nome,
+        limite_territorial=limite_territorial,
+        )
         self.db.add(cidade)
         self.db.commit()
         self.db.refresh(cidade)
@@ -40,10 +47,12 @@ class HotelRepository:
         self,
         nome: str,
         cidade_id,
+        categoria_estrelas: int,
     ) -> Hotel:
         hotel = Hotel(
             nome=nome,
             cidade_id=cidade_id,
+            categoria_estrelas=categoria_estrelas,
         )
         self.db.add(hotel)
         self.db.commit()
