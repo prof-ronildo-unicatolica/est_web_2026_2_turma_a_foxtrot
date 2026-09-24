@@ -43,7 +43,8 @@ export default function AuthForm() {
     setTipoMensagem('sucesso')
   }
 
-  function handleLoginSubmit(event) {
+  
+  async function handleLoginSubmit(event) {
     event.preventDefault()
 
     if (!login.email || !login.senha) {
@@ -58,8 +59,42 @@ export default function AuthForm() {
       return
     }
 
-    setMensagem('Login preenchido corretamente.')
-    setTipoMensagem('sucesso')
+    try {
+      const resposta = await fetch(
+        'http://localhost:8000/api/v1/auth/login',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: login.email,
+            senha: login.senha,
+          }),
+        }
+      )
+
+      if (!resposta.ok) {
+        throw new Error(
+          resposta.status === 401
+            ? 'E-mail ou senha incorretos.'
+            : 'Não foi possível realizar o login.'
+        )
+      }
+
+      const dados = await resposta.json()
+
+      if (!dados.access_token) {
+        throw new Error('A API não retornou um token de acesso.')
+      }
+
+      setMensagem('Login realizado com sucesso!')
+      setTipoMensagem('sucesso')
+
+    } catch (erro) {
+      setMensagem(erro.message)
+      setTipoMensagem('erro')
+    }
   }
 
   return (
