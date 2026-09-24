@@ -26,7 +26,11 @@ class CidadeService:
     def __init__(self, db: Session):
         self.repository = CidadeRepository(db)
 
-    def criar(self, nome: str) -> Cidade:
+    def criar(
+        self,
+        nome: str,
+        limite_territorial: dict | None = None,
+    ) -> Cidade:
         nome = nome.strip()
 
         if self.repository.get_by_nome(nome):
@@ -34,7 +38,10 @@ class CidadeService:
                 f"Ja existe uma cidade chamada '{nome}'."
             )
 
-        return self.repository.create(nome=nome)
+        return self.repository.create(
+            nome=nome,
+            limite_territorial=limite_territorial,
+        )
 
     def listar(self) -> list[Cidade]:
         return self.repository.list()
@@ -49,6 +56,7 @@ class HotelService:
         self,
         nome: str,
         cidade_id,
+        categoria_estrelas: int,
     ) -> Hotel:
         nome = nome.strip()
 
@@ -60,6 +68,7 @@ class HotelService:
         return self.repository.create(
             nome=nome,
             cidade_id=cidade_id,
+            categoria_estrelas=categoria_estrelas,
         )
 
     def listar(self, cidade_id=None) -> list[Hotel]:

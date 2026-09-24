@@ -5,12 +5,14 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class CidadeCreateSchema(BaseModel):
-    nome: str = Field(min_length=1)
+    nome: str = Field(min_length=1, max_length=100)
+    limite_territorial: dict | None = None
 
 
 class CidadeResponseSchema(BaseModel):
     id: UUID
     nome: str
+    limite_territorial: dict | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -24,6 +26,7 @@ class HotelCreateSchema(BaseModel):
 
     nome: str = Field(min_length=1, max_length=100)
     cidade_id: UUID
+    categoria_estrelas: int = Field(ge=1, le=5)
 
 
 class HotelResponseSchema(BaseModel):
@@ -37,6 +40,7 @@ class HotelResponseSchema(BaseModel):
 
     id: UUID
     nome: str
+    categoria_estrelas: int
     cidade: CidadeResponseSchema
 
 
@@ -46,3 +50,14 @@ class CidadeComHoteisSchema(CidadeResponseSchema):
     """
 
     hoteis: List[HotelResponseSchema] = []
+
+
+class ComodidadeCreateSchema(BaseModel):
+    nome: str = Field(min_length=1, max_length=100)
+
+
+class ComodidadeResponseSchema(BaseModel):
+    id: UUID
+    nome: str
+
+    model_config = ConfigDict(from_attributes=True)

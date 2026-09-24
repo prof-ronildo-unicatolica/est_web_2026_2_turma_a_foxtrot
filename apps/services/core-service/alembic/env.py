@@ -20,7 +20,7 @@ from app.models.tutorial import (
 from app.models.usuario import Usuario
 from app.models.cidade import Cidade
 from app.models.hotel import Hotel
-
+from app.models.comodidade import Comodidade
 # Objeto de configuração do Alembic
 config = context.config
 

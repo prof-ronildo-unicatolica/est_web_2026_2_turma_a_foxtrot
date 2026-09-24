@@ -3,6 +3,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
+from app.api.deps import get_current_admin
 from app.core.database import get_db
 from app.schemas.hotel import HotelCreateSchema, HotelResponseSchema
 from app.services.hotel_service import CidadeNaoEncontradaError, HotelService
@@ -19,6 +20,7 @@ router = APIRouter(prefix="/hoteis", tags=["Hoteis"])
 def criar_hotel(
     payload: HotelCreateSchema,
     db: Session = Depends(get_db),
+    _admin=Depends(get_current_admin),
 ):
     service = HotelService(db)
 
@@ -26,6 +28,7 @@ def criar_hotel(
         return service.criar(
             nome=payload.nome,
             cidade_id=payload.cidade_id,
+            categoria_estrelas=payload.categoria_estrelas,
         )
     except CidadeNaoEncontradaError as e:
         raise HTTPException(
