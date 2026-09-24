@@ -8,6 +8,7 @@ import Sidebar from './components/Sidebar'
 import VideoComponent from './components/VideoComponent'
 import InteractiveExamples from './components/InteractiveExamples'
 import AuthForm from './components/AuthForm'
+import MinhasReservas from './components/MinhasReservas'
 
 function HomePage() {
   const [data, setData] = useState(null)
@@ -457,6 +458,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<AuthForm />} />
+      <Route path="/minhas-reservas" element={<MinhasReservas />} />
     </Routes>
   )
 }

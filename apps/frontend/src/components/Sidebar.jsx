@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 export default function Sidebar() {
   return (
     <div className="bg-dark text-white p-3 rounded shadow-sm h-100">
@@ -23,9 +25,9 @@ export default function Sidebar() {
         </li>
 
         <li className="nav-item mb-2">
-          <a href="#minhas-reservas" className="nav-link text-white">
+          <Link to="/minhas-reservas" className="nav-link text-white">
             Minhas Reservas
-          </a>
+          </Link>
         </li>
 
         <li className="nav-item mb-2">
