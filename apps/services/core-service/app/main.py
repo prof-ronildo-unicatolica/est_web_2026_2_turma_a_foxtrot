@@ -9,7 +9,8 @@ from app.api.v1.sobre import router as sobre_router
 from app.core.config import settings
 from app.core.database import get_mongo_db
 from app.core.seed_mongo import seed_mongo_users
-from app.api.v1.cidades import router as cidades_router 
+from app.api.v1.cidades import router as cidades_router
+from app.api.v1.hoteis import router as hoteis_router
 
 
 @asynccontextmanager
@@ -39,6 +40,7 @@ app.include_router(health_router, prefix=settings.API_V1_STR)
 app.include_router(sobre_router, prefix=settings.API_V1_STR)
 app.include_router(auth_router, prefix=settings.API_V1_STR)
 app.include_router(cidades_router, prefix=settings.API_V1_STR)
+app.include_router(hoteis_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/")
