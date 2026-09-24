@@ -1,0 +1,83 @@
+from sqlalchemy.orm import Session
+
+from app.models.cidade import Cidade
+from app.models.hotel import Hotel
+from app.repositories.hotel_repository import CidadeRepository, HotelRepository
+
+# --- Excecoes de dominio -----------------------------------------------------
+
+
+class RegraDeNegocioError(Exception):
+    """Base de todas as excecoes de negocio deste modulo."""
+
+
+class CidadeJaExisteError(RegraDeNegocioError):
+    pass
+
+
+class CidadeNaoEncontradaError(RegraDeNegocioError):
+    pass
+
+
+# --- Services ----------------------------------------------------------------
+
+
+class CidadeService:
+    def __init__(self, db: Session):
+        self.repository = CidadeRepository(db)
+
+    def criar(
+        self,
+        nome: str,
+        limite_territorial: dict | None = None,
+    ) -> Cidade:
+        nome = nome.strip()
+
+        if self.repository.get_by_nome(nome):
+            raise CidadeJaExisteError(
+                f"Ja existe uma cidade chamada '{nome}'."
+            )
+
+        return self.repository.create(
+            nome=nome,
+            limite_territorial=limite_territorial,
+        )
+
+    def listar(self) -> list[Cidade]:
+        return self.repository.list()
+
+
+class HotelService:
+    def __init__(self, db: Session):
+        self.repository = HotelRepository(db)
+        self.cidades = CidadeRepository(db)
+
+    def criar(
+        self,
+        nome: str,
+        cidade_id,
+        categoria_estrelas: int,
+    ) -> Hotel:
+        nome = nome.strip()
+
+        if not self.cidades.get_by_id(cidade_id):
+            raise CidadeNaoEncontradaError(
+                f"Nao existe cidade com id '{cidade_id}'."
+            )
+
+        return self.repository.create(
+            nome=nome,
+            cidade_id=cidade_id,
+            categoria_estrelas=categoria_estrelas,
+        )
+
+    def listar(self, cidade_id=None) -> list[Hotel]:
+        if cidade_id is not None:
+            if not self.cidades.get_by_id(cidade_id):
+                raise CidadeNaoEncontradaError(
+                    f"Nao existe cidade com id '{cidade_id}'."
+                )
+
+            return self.repository.list_by_cidade(cidade_id)
+
+        return self.repository.list()

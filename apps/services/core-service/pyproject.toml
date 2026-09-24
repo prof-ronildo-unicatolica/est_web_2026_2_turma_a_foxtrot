@@ -19,7 +19,9 @@ pydantic = "^2.6.4"
 pydantic-settings = "^2.2.1"
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 bcrypt = "^4.1.2"
+pyjwt = "^2.10.1"
 uuid6 = "^2025.0.1"
+
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.3.0"
