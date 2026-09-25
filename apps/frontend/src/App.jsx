@@ -131,7 +131,9 @@ function HomePage() {
       )
 
       const json = await buscarHoteis(
-        filtros.cidade
+        filtros.cidade,
+        filtros.estrelas
+
       )
 
       console.log(
@@ -159,18 +161,7 @@ function HomePage() {
   // FILTRO DE ESTRELAS
   // =========================================================
 
-  const hoteisFiltrados = hoteis.filter(
-    (hotel) => {
-      if (!filtros.estrelas) {
-        return true
-      }
-
-      return (
-        Number(hotel.categoria_estrelas) ===
-        Number(filtros.estrelas)
-      )
-    }
-  )
+  const hoteisFiltrados = hoteis
 
   return (
     <div className="bg-light min-vh-100 pb-5">
@@ -775,10 +766,59 @@ function HomePage() {
                     </p>
                   )}
 
-                  <p className="mb-0">
+                  <p className="mb-3">
                     <strong>ID:</strong>{' '}
-                    {hotelSelecionado.id}
+                    {hotelSelecionado.hotel_id}
                   </p>
+
+                  <hr />
+
+                  <h3 className="h5 text-primary fw-bold mb-3">
+                    Quartos
+                  </h3>
+
+                  {hotelSelecionado.quartos?.length > 0 ? (
+                    <div className="row g-3">
+                      {hotelSelecionado.quartos.map((quarto) => (
+                        <div
+                          className="col-md-6"
+                          key={quarto.id}
+                        >
+                          <div className="card h-100 border">
+                            <div className="card-body">
+                              <h4 className="h6 fw-bold">
+                                Quarto {quarto.numero}
+                              </h4>
+
+                              <p className="mb-2">
+                                <strong>Tipo:</strong>{' '}
+                                {quarto.tipo}
+                              </p>
+
+                              <p className="mb-2">
+                                <strong>Diária:</strong>{' '}
+                                R$ {Number(quarto.preco_diaria).toFixed(2)}
+                              </p>
+
+                              <p className="mb-1">
+                                <strong>Adultos:</strong>{' '}
+                                até {quarto.max_adultos}
+                              </p>
+
+                              <p className="mb-0">
+                                <strong>Crianças:</strong>{' '}
+                                até {quarto.max_criancas}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-secondary mb-0">
+                      Nenhum quarto cadastrado para este hotel.
+                    </p>
+                  )}
 
                 </div>
 
