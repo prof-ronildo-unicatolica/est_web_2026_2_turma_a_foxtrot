@@ -41,16 +41,23 @@ export async function buscarCidades() {
   )
 }
 
-export async function buscarHoteis(cidadeId = '') {
+export async function buscarHoteis(
+  cidadeId = '',
+  categoriaEstrelas = ''
+) {
   const parametros = new URLSearchParams()
 
   if (cidadeId) {
     parametros.append('cidade_id', cidadeId)
   }
 
+  if (categoriaEstrelas) {
+    parametros.append('categoria_estrelas', categoriaEstrelas)
+  }
+
   const url = parametros.toString()
-    ? `${API_URL}/hoteis?${parametros.toString()}`
-    : `${API_URL}/hoteis`
+    ? `${API_URL}/hoteis/buscar?${parametros.toString()}`
+    : `${API_URL}/hoteis/buscar`
 
   const resposta = await fetch(
     url,
