@@ -61,3 +61,23 @@ class ComodidadeResponseSchema(BaseModel):
     nome: str
 
     model_config = ConfigDict(from_attributes=True)
+
+class QuartoCreateSchema(BaseModel):
+    hotel_id: UUID
+    numero: str = Field(min_length=1, max_length=10)
+    tipo: str = Field(min_length=1, max_length=50)
+    preco_diaria: float = Field(ge=0)
+    max_adultos: int = Field(ge=1)
+    max_criancas: int = Field(default=0, ge=0)
+
+
+class QuartoResponseSchema(BaseModel):
+    id: UUID
+    hotel_id: UUID
+    numero: str
+    tipo: str
+    preco_diaria: float
+    max_adultos: int
+    max_criancas: int
+
+    model_config = ConfigDict(from_attributes=True)
