@@ -21,6 +21,7 @@ from app.models.usuario import Usuario
 from app.models.cidade import Cidade
 from app.models.hotel import Hotel
 from app.models.comodidade import Comodidade
+from app.models.quarto import Quarto
 # Objeto de configuração do Alembic
 config = context.config
 

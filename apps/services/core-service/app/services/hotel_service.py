@@ -2,7 +2,9 @@ from sqlalchemy.orm import Session
 
 from app.models.cidade import Cidade
 from app.models.hotel import Hotel
+from app.repositories.comodidade_repository import ComodidadeRepository
 from app.repositories.hotel_repository import CidadeRepository, HotelRepository
+
 
 # --- Excecoes de dominio -----------------------------------------------------
 
@@ -16,6 +18,14 @@ class CidadeJaExisteError(RegraDeNegocioError):
 
 
 class CidadeNaoEncontradaError(RegraDeNegocioError):
+    pass
+
+
+class HotelNaoEncontradoError(RegraDeNegocioError):
+    pass
+
+
+class ComodidadeNaoEncontradaError(RegraDeNegocioError):
     pass
 
 
@@ -51,6 +61,7 @@ class HotelService:
     def __init__(self, db: Session):
         self.repository = HotelRepository(db)
         self.cidades = CidadeRepository(db)
+        self.comodidades = ComodidadeRepository(db)
 
     def criar(
         self,
@@ -69,6 +80,30 @@ class HotelService:
             nome=nome,
             cidade_id=cidade_id,
             categoria_estrelas=categoria_estrelas,
+        )
+
+    def adicionar_comodidade(
+        self,
+        hotel_id,
+        comodidade_id,
+    ) -> Hotel:
+        hotel = self.repository.get_by_id(hotel_id)
+
+        if not hotel:
+            raise HotelNaoEncontradoError(
+                f"Nao existe hotel com id '{hotel_id}'."
+            )
+
+        comodidade = self.comodidades.get_by_id(comodidade_id)
+
+        if not comodidade:
+            raise ComodidadeNaoEncontradaError(
+                f"Nao existe comodidade com id '{comodidade_id}'."
+            )
+
+        return self.repository.adicionar_comodidade(
+            hotel=hotel,
+            comodidade=comodidade,
         )
 
     def listar(self, cidade_id=None) -> list[Hotel]:

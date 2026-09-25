@@ -1,6 +1,6 @@
 from typing import List
 
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.models.cidade import Cidade
 from app.models.hotel import Hotel
@@ -79,7 +79,24 @@ class HotelRepository:
     def get_by_id(self, hotel_id) -> Hotel | None:
         return (
             self.db.query(Hotel)
-            .options(joinedload(Hotel.cidade))
+            .options(
+                joinedload(Hotel.cidade),
+                selectinload(Hotel.quartos),
+                selectinload(Hotel.comodidades),
+            )
             .filter(Hotel.id == hotel_id)
             .first()
         )
+
+    def adicionar_comodidade(
+        self,
+        hotel: Hotel,
+        comodidade,
+    ) -> Hotel:
+        if comodidade not in hotel.comodidades:
+            hotel.comodidades.append(comodidade)
+
+        self.db.commit()
+        self.db.refresh(hotel)
+
+        return hotel

@@ -8,6 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.uuid_utils import gerar_uuid7
 from app.models.base import Base
 from app.models.cidade import Cidade
+from app.models.quarto import Quarto
 
 if TYPE_CHECKING:
     from app.models.comodidade import Comodidade
@@ -59,6 +60,11 @@ class Hotel(Base):
 
     cidade: Mapped["Cidade"] = relationship(
         back_populates="hoteis",
+    )
+
+    quartos: Mapped[list["Quarto"]] = relationship(
+        back_populates="hotel",
+        cascade="all, delete-orphan",
     )
 
     comodidades: Mapped[list["Comodidade"]] = relationship(
