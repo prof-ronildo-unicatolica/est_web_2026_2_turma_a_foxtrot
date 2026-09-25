@@ -2,6 +2,8 @@ import { Routes, Route, Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import Sidebar from './components/Sidebar'
 import AuthForm from './components/AuthForm'
+import MinhasReservas from './components/MinhasReservas'
+
 import {
   buscarCidades,
   buscarHoteis,
@@ -808,17 +810,9 @@ function HomePage() {
 export default function App() {
   return (
     <Routes>
-
-      <Route
-        path="/"
-        element={<HomePage />}
-      />
-
-      <Route
-        path="/login"
-        element={<AuthForm />}
-      />
-
+      <Route path="/" element={<HomePage />} />
+      <Route path="/login" element={<AuthForm />} />
+      <Route path="/minhas-reservas" element={<MinhasReservas />} /> 
     </Routes>
   )
 }

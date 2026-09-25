@@ -1,3 +1,4 @@
+
 import { useState } from 'react'
 
 export default function AuthForm() {
@@ -11,6 +12,7 @@ export default function AuthForm() {
 
   const [mensagem, setMensagem] = useState('')
 
+  // LOGIN
   async function handleLogin(event) {
     event.preventDefault()
 
@@ -41,6 +43,11 @@ export default function AuthForm() {
         return
       }
 
+      if (!dados.access_token) {
+        setMensagem('A API não retornou um token de acesso.')
+        return
+      }
+
       localStorage.setItem('access_token', dados.access_token)
 
       setMensagem('Login realizado com sucesso!')
@@ -49,6 +56,7 @@ export default function AuthForm() {
     }
   }
 
+  // CADASTRO
   async function handleCadastro(event) {
     event.preventDefault()
 
@@ -148,7 +156,9 @@ export default function AuthForm() {
                 className="form-control"
                 placeholder="Digite seu e-mail"
                 value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                onChange={(event) =>
+                  setEmail(event.target.value)
+                }
               />
             </div>
 
@@ -163,7 +173,9 @@ export default function AuthForm() {
                 className="form-control"
                 placeholder="Digite sua senha"
                 value={senha}
-                onChange={(event) => setSenha(event.target.value)}
+                onChange={(event) =>
+                  setSenha(event.target.value)
+                }
               />
             </div>
 
@@ -179,7 +191,10 @@ export default function AuthForm() {
         {modo === 'cadastro' && (
           <form onSubmit={handleCadastro}>
             <div className="mb-3">
-              <label htmlFor="nomeCadastro" className="form-label">
+              <label
+                htmlFor="nomeCadastro"
+                className="form-label"
+              >
                 Nome
               </label>
 
@@ -189,12 +204,17 @@ export default function AuthForm() {
                 className="form-control"
                 placeholder="Digite seu nome"
                 value={nome}
-                onChange={(event) => setNome(event.target.value)}
+                onChange={(event) =>
+                  setNome(event.target.value)
+                }
               />
             </div>
 
             <div className="mb-3">
-              <label htmlFor="emailCadastro" className="form-label">
+              <label
+                htmlFor="emailCadastro"
+                className="form-label"
+              >
                 E-mail
               </label>
 
@@ -204,12 +224,17 @@ export default function AuthForm() {
                 className="form-control"
                 placeholder="Digite seu e-mail"
                 value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                onChange={(event) =>
+                  setEmail(event.target.value)
+                }
               />
             </div>
 
             <div className="mb-3">
-              <label htmlFor="senhaCadastro" className="form-label">
+              <label
+                htmlFor="senhaCadastro"
+                className="form-label"
+              >
                 Senha
               </label>
 
@@ -219,7 +244,9 @@ export default function AuthForm() {
                 className="form-control"
                 placeholder="Digite sua senha"
                 value={senha}
-                onChange={(event) => setSenha(event.target.value)}
+                onChange={(event) =>
+                  setSenha(event.target.value)
+                }
               />
             </div>
 
