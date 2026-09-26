@@ -43,3 +43,19 @@ def calcular_adicional_criancas(
             adicional += total_diarias * Decimal("0.50")
 
     return adicional
+
+def calcular_adicional_horario(
+    preco_diaria: Decimal,
+    early_checkin: bool = False,
+    late_checkout: bool = False,
+) -> Decimal:
+    adicional = Decimal("0.00")
+    percentual = Decimal("0.30")
+
+    if early_checkin:
+        adicional += preco_diaria * percentual
+
+    if late_checkout:
+        adicional += preco_diaria * percentual
+
+    return adicional

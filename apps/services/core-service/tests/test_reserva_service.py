@@ -5,9 +5,9 @@ from uuid import uuid4
 from app.models.tarifa_temporada import TarifaTemporada
 from app.services.reserva_service import (
     calcular_adicional_criancas,
+    calcular_adicional_horario,
     calcular_diarias,
 )
-
 
 def test_calcular_diarias_basicas():
     total = calcular_diarias(
@@ -54,3 +54,32 @@ def test_crianca_de_6_a_12_anos_paga_50_porcento():
     )
 
     assert adicional == Decimal("300.00")
+
+def test_early_checkin_acrescenta_30_porcento_da_diaria():
+    adicional = calcular_adicional_horario(
+        preco_diaria=Decimal("200.00"),
+        early_checkin=True,
+        late_checkout=False,
+    )
+
+    assert adicional == Decimal("60.00")
+
+
+def test_late_checkout_acrescenta_30_porcento_da_diaria():
+    adicional = calcular_adicional_horario(
+        preco_diaria=Decimal("200.00"),
+        early_checkin=False,
+        late_checkout=True,
+    )
+
+    assert adicional == Decimal("60.00")
+
+
+def test_early_checkin_e_late_checkout_somam_os_adicionais():
+    adicional = calcular_adicional_horario(
+        preco_diaria=Decimal("200.00"),
+        early_checkin=True,
+        late_checkout=True,
+    )
+
+    assert adicional == Decimal("120.00")
