@@ -2,6 +2,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 
 from app.models.tarifa_temporada import TarifaTemporada
+from app.models.servico_adicional import ServicoAdicional
 
 
 def calcular_diarias(
@@ -59,3 +60,13 @@ def calcular_adicional_horario(
         adicional += preco_diaria * percentual
 
     return adicional
+
+def calcular_servicos_adicionais(
+    servicos: list[ServicoAdicional],
+) -> Decimal:
+    total = Decimal("0.00")
+
+    for servico in servicos:
+        total += servico.preco
+
+    return total

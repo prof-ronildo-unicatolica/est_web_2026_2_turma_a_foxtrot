@@ -2,12 +2,15 @@ from datetime import date
 from decimal import Decimal
 from uuid import uuid4
 
+from app.models.servico_adicional import ServicoAdicional
 from app.models.tarifa_temporada import TarifaTemporada
 from app.services.reserva_service import (
     calcular_adicional_criancas,
     calcular_adicional_horario,
     calcular_diarias,
+    calcular_servicos_adicionais,
 )
+
 
 def test_calcular_diarias_basicas():
     total = calcular_diarias(
@@ -55,6 +58,7 @@ def test_crianca_de_6_a_12_anos_paga_50_porcento():
 
     assert adicional == Decimal("300.00")
 
+
 def test_early_checkin_acrescenta_30_porcento_da_diaria():
     adicional = calcular_adicional_horario(
         preco_diaria=Decimal("200.00"),
@@ -83,3 +87,29 @@ def test_early_checkin_e_late_checkout_somam_os_adicionais():
     )
 
     assert adicional == Decimal("120.00")
+
+
+def test_calcular_servicos_adicionais():
+    cafe = ServicoAdicional(
+        nome="Café da manhã",
+        preco=Decimal("50.00"),
+    )
+
+    estacionamento = ServicoAdicional(
+        nome="Estacionamento",
+        preco=Decimal("30.00"),
+    )
+
+    total = calcular_servicos_adicionais(
+        servicos=[cafe, estacionamento],
+    )
+
+    assert total == Decimal("80.00")
+
+
+def test_sem_servicos_adicionais_retorna_zero():
+    total = calcular_servicos_adicionais(
+        servicos=[],
+    )
+
+    assert total == Decimal("0.00")
