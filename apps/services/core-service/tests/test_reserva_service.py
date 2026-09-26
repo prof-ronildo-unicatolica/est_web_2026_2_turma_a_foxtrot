@@ -14,7 +14,6 @@ from app.services.reserva_service import (
 )
 
 
-
 def test_calcular_diarias_basicas():
     total = calcular_diarias(
         preco_diaria=Decimal("200.00"),
@@ -168,3 +167,70 @@ def test_calcular_total_reserva_com_todas_as_regras():
     )
 
     assert total == Decimal("1260.00")
+
+
+def test_crianca_de_5_anos_nao_paga():
+    adicional = calcular_adicional_criancas(
+        total_diarias=Decimal("600.00"),
+        idades_criancas=[5],
+    )
+
+    assert adicional == Decimal("0.00")
+
+
+def test_crianca_de_6_anos_paga_50_porcento():
+    adicional = calcular_adicional_criancas(
+        total_diarias=Decimal("600.00"),
+        idades_criancas=[6],
+    )
+
+    assert adicional == Decimal("300.00")
+
+
+def test_crianca_de_12_anos_paga_50_porcento():
+    adicional = calcular_adicional_criancas(
+        total_diarias=Decimal("600.00"),
+        idades_criancas=[12],
+    )
+
+    assert adicional == Decimal("300.00")
+
+
+def test_duas_criancas_de_6_a_12_anos():
+    adicional = calcular_adicional_criancas(
+        total_diarias=Decimal("600.00"),
+        idades_criancas=[7, 10],
+    )
+
+    assert adicional == Decimal("600.00")
+
+
+def test_sem_early_e_sem_late_nao_tem_adicional():
+    adicional = calcular_adicional_horario(
+        preco_diaria=Decimal("200.00"),
+        early_checkin=False,
+        late_checkout=False,
+    )
+
+    assert adicional == Decimal("0.00")
+
+
+def test_diarias_sem_tarifa_temporada():
+    total = calcular_diarias(
+        preco_diaria=Decimal("200.00"),
+        data_checkin=date(2026, 10, 1),
+        data_checkout=date(2026, 10, 3),
+        tarifas_temporada=[],
+    )
+
+    assert total == Decimal("400.00")
+
+
+def test_total_reserva_sem_adicionais():
+    total = calcular_total_reserva(
+        preco_diaria=Decimal("200.00"),
+        data_checkin=date(2026, 10, 1),
+        data_checkout=date(2026, 10, 4),
+    )
+
+    assert total == Decimal("600.00")
