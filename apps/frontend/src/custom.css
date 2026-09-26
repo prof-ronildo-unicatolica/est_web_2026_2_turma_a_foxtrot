@@ -1,4 +1,865 @@
-/* 
-  Arquivo CSS para personalizacao propria dos alunos.
-  Adicione suas regras CSS personalizadas aqui!
-*/
+
+.home-hotelaria {
+  --hotel-azul: #102b50;
+  --hotel-dourado: #bd7654;
+  --hotel-texto: #24364b;
+
+  position: relative;
+  background: #f4f3f1 !important;
+  color: var(--hotel-texto);
+  min-height: 100vh;
+  padding-bottom: 40px !important;
+}
+
+.home-hotelaria > .navbar {
+  position: absolute !important;
+  top: 24px;
+  left: 0;
+  width: 100%;
+  z-index: 20;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none;
+  padding: 18px 0 !important;
+  margin: 0 !important;
+}
+
+.home-hotelaria > .navbar > .container {
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
+.home-hotelaria .navbar-brand .text-primary {
+  color: #ffffff !important;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.home-hotelaria .navbar .nav-link {
+  color: rgba(255, 255, 255, 0.85) !important;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+}
+
+.home-hotelaria .navbar .nav-link:hover,
+.home-hotelaria .navbar .nav-link.active {
+  color: #ffffff !important;
+}
+
+.home-hotelaria .navbar .btn-primary {
+  background: var(--hotel-dourado);
+  border-color: var(--hotel-dourado);
+  border-radius: 30px;
+  padding: 8px 20px;
+}
+
+.home-hotelaria .navbar .btn-outline-primary {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.7);
+  border-radius: 30px;
+  padding: 8px 20px;
+}
+
+.home-hotelaria .navbar .btn-outline-primary:hover {
+  background: #ffffff;
+  color: var(--hotel-azul);
+}
+
+.home-hotelaria .navbar .badge {
+  background: rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+}
+
+.home-hotelaria > .container > header {
+  position: relative;
+  min-height: 540px;
+  margin-top: 24px !important;
+  margin-bottom: 0 !important;
+  padding: 155px 48px 125px !important;
+  border: none !important;
+  border-radius: 32px !important;
+  overflow: hidden;
+
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(5, 23, 49, 0.76) 0%,
+      rgba(8, 31, 59, 0.35) 45%,
+      rgba(5, 23, 49, 0.78) 100%
+    ),
+    url("https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2000&q=85") !important;
+
+  background-position: center !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+
+  box-shadow: 0 16px 35px rgba(15, 23, 42, 0.14) !important;
+  color: #ffffff;
+}
+
+.home-hotelaria header h1 {
+  color: #ffffff !important;
+  font-size: clamp(1.8rem, 3.2vw, 2.8rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -1px;
+  max-width: 730px;
+}
+
+.home-hotelaria header .lead {
+  color: #e2e8f0 !important;
+  font-size: 1rem;
+}
+
+.home-hotelaria header strong {
+  color: #ffffff;
+}
+
+.home-hotelaria header .text-secondary {
+  color: #e2e8f0 !important;
+}
+
+.home-hotelaria header hr {
+  border-color: rgba(255, 255, 255, 0.45);
+  opacity: 1;
+}
+
+.home-hotelaria header .btn-outline-secondary {
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 30px;
+  padding: 10px 18px;
+}
+
+.home-hotelaria header .btn-outline-secondary:hover {
+  background: #ffffff;
+  color: var(--hotel-azul);
+}
+
+.home-hotelaria > .container > .row.g-4 {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 5;
+  margin-top: -105px;
+  gap: 22px;
+}
+
+.home-hotelaria #buscar-hoteis {
+  order: 1;
+  width: 100%;
+}
+
+.home-hotelaria > .container > .row.g-4 > .col-md-3 {
+  display: none !important;
+}
+
+.home-hotelaria #buscar-hoteis > .card {
+  background: rgba(247, 242, 236, 0.97) !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 15px 35px rgba(15, 23, 42, 0.18) !important;
+}
+
+.home-hotelaria #buscar-hoteis > .card > .card-body {
+  background: transparent !important;
+  padding: 26px 30px !important;
+}
+
+.home-hotelaria #buscar-hoteis h2 {
+  color: var(--hotel-azul) !important;
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 22px !important;
+}
+
+.home-hotelaria #buscar-hoteis form .row.g-3 {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.home-hotelaria #buscar-hoteis form .row.g-3 > div {
+  width: 100%;
+  max-width: none;
+  padding: 0;
+  margin: 0;
+}
+
+.home-hotelaria #buscar-hoteis .form-label {
+  color: #526174;
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.home-hotelaria #buscar-hoteis .form-control,
+.home-hotelaria #buscar-hoteis .form-select {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 10px 8px;
+  background: #ffffff !important;
+  color: #24364b;
+  border: 1px solid #ddd5ce;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  box-shadow: none;
+}
+
+.home-hotelaria #buscar-hoteis .form-control:focus,
+.home-hotelaria #buscar-hoteis .form-select:focus {
+  border-color: var(--hotel-dourado);
+  box-shadow: 0 0 0 3px rgba(189, 118, 84, 0.15);
+  outline: none;
+}
+
+.home-hotelaria #buscar-hoteis button[type="submit"] {
+  display: block;
+  min-height: 48px;
+  margin-top: 22px !important;
+  padding: 12px 32px !important;
+  background: var(--hotel-dourado) !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 30px !important;
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 0 5px 15px rgba(189, 118, 84, 0.25);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.home-hotelaria #buscar-hoteis button[type="submit"]:hover {
+  background: #9d593a !important;
+  transform: translateY(-2px);
+}
+
+.home-hotelaria #buscar-hoteis button[type="submit"]:disabled {
+  opacity: 0.65;
+  transform: none;
+}
+
+.home-hotelaria #buscar-hoteis > .mt-4 {
+  margin-top: 40px !important;
+}
+
+.home-hotelaria #buscar-hoteis > .mt-4 > .card {
+  background: #ffffff !important;
+  border: 1px solid #e8e4df !important;
+  border-radius: 20px !important;
+  box-shadow: 0 6px 22px rgba(15, 23, 42, 0.06) !important;
+}
+
+.home-hotelaria #buscar-hoteis .card .card {
+  background: #ffffff;
+  border: 1px solid #e8e4df;
+  border-radius: 14px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.home-hotelaria #buscar-hoteis .card .card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.1);
+}
+
+.home-hotelaria #buscar-hoteis h3,
+.home-hotelaria #buscar-hoteis h4 {
+  color: var(--hotel-azul);
+}
+
+.home-hotelaria #buscar-hoteis .btn-outline-primary {
+  color: var(--hotel-dourado);
+  border-color: var(--hotel-dourado);
+  border-radius: 30px;
+}
+
+.home-hotelaria #buscar-hoteis .btn-outline-primary:hover {
+  background: var(--hotel-dourado);
+  color: #ffffff;
+}
+
+.home-hotelaria footer {
+  color: #64748b !important;
+  font-size: 0.85rem;
+  margin-top: 45px !important;
+  padding: 20px 0 !important;
+}
+
+@media (max-width: 1199px) {
+  .home-hotelaria #buscar-hoteis form .row.g-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 991px) {
+  .home-hotelaria .navbar-collapse {
+    background: #102b50;
+    border-radius: 12px;
+    padding: 15px;
+    margin-top: 10px;
+  }
+
+  .home-hotelaria .navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.6);
+  }
+}
+
+@media (max-width: 767px) {
+  .home-hotelaria > .navbar {
+    top: 24px;
+    padding: 12px 0 !important;
+  }
+
+  .home-hotelaria > .navbar > .container {
+    padding-left: 25px;
+    padding-right: 25px;
+  }
+
+  .home-hotelaria > .container > header {
+    min-height: 390px;
+    margin-top: 15px !important;
+    padding: 145px 25px 115px !important;
+    border-radius: 20px !important;
+  }
+
+  .home-hotelaria header h1 {
+    font-size: 1.7rem;
+  }
+
+  .home-hotelaria header .row.g-3 {
+    font-size: 0.8rem;
+  }
+
+  .home-hotelaria > .container > .row.g-4 {
+    margin-top: -70px;
+  }
+
+  .home-hotelaria #buscar-hoteis > .card > .card-body {
+    padding: 22px 20px !important;
+  }
+
+  .home-hotelaria #buscar-hoteis form .row.g-3 {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .home-hotelaria #buscar-hoteis button[type="submit"] {
+    width: 100%;
+  }
+}
+
+
+.home-hotelaria {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow-x: clip;
+}
+
+.home-hotelaria > .navbar {
+  top: 0 !important;
+  left: 0;
+  width: 100%;
+  margin: 0 !important;
+  padding-top: 20px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.home-hotelaria > .container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+}
+
+.home-hotelaria > .container > header {
+  width: 100vw;
+  max-width: none;
+  min-height: 650px;
+
+  margin-top: 0 !important;
+  margin-left: calc(50% - 50vw);
+  margin-right: 0 !important;
+  margin-bottom: 0 !important;
+
+  padding-top: 155px !important;
+
+  border: none !important;
+  border-radius: 0 !important;
+
+  background-size: cover !important;
+  background-position: center 55% !important;
+  background-repeat: no-repeat !important;
+}
+
+.home-hotelaria > .container > .row.g-4 {
+  position: relative;
+  z-index: 5;
+  margin-top: -105px !important;
+}
+
+.home-hotelaria > .container > footer {
+  margin-top: auto !important;
+  padding-top: 70px !important;
+  padding-bottom: 25px !important;
+  text-align: center;
+}
+
+@media (max-width: 767px) {
+  .home-hotelaria > .navbar {
+    top: 0 !important;
+  }
+
+  .home-hotelaria > .container > header {
+    width: 100vw;
+    min-height: 600px;
+
+    margin-top: 0 !important;
+    margin-left: calc(50% - 50vw);
+
+    padding: 145px 25px 115px !important;
+
+    border-radius: 0 !important;
+    background-position: center !important;
+  }
+
+  .home-hotelaria > .container > .row.g-4 {
+    margin-top: -75px !important;
+  }
+
+  .home-hotelaria > .container > footer {
+    padding-top: 50px !important;
+    padding-bottom: 25px !important;
+  }
+}
+
+
+.home-hotelaria header > .row.g-3 {
+  position: relative;
+  z-index: 2;
+  padding: 22px 40px;
+  margin-top: 20px !important;
+  margin-left: -48px;
+  margin-right: -48px;
+
+  background: rgba(10, 25, 45, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.home-hotelaria header > .row.g-3 strong,
+.home-hotelaria header > .row.g-3 span {
+  color: #ffffff !important;
+}
+
+@media (max-width: 767px) {
+  .home-hotelaria header > .row.g-3 {
+    margin-left: -25px;
+    margin-right: -25px;
+    padding: 20px 25px;
+  }
+}
+
+
+.home-hotelaria header > .row.g-3 {
+  position: relative;
+  z-index: 2;
+
+  margin-top: 20px !important;
+  margin-left: -48px;
+  margin-right: -48px;
+
+  padding: 22px 40px;
+
+  background: transparent !important;
+
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.home-hotelaria header h1 {
+  color: #ffffff !important;
+  font-size: clamp(1.8rem, 3vw, 2.7rem);
+  font-weight: 700;
+  letter-spacing: -0.8px;
+  line-height: 1.2;
+
+  text-shadow: 0 3px 15px rgba(0, 0, 0, 0.55);
+}
+
+.home-hotelaria header .lead {
+  color: #f1f5f9 !important;
+  font-size: 1rem;
+  font-weight: 400;
+
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+.home-hotelaria header hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.65),
+    rgba(255, 255, 255, 0.15)
+  );
+  opacity: 1;
+}
+
+.home-hotelaria header > .row.g-3 > div {
+  position: relative;
+  isolation: isolate;
+}
+
+.home-hotelaria header > .row.g-3 > div::before {
+  content: "";
+
+  position: absolute;
+  inset: -12px 6px;
+
+  z-index: -1;
+
+  background: rgba(12, 27, 46, 0.48);
+
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.home-hotelaria header > .row.g-3 strong {
+  color: #ffffff !important;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.home-hotelaria header > .row.g-3 span {
+  color: #e2e8f0 !important;
+  font-size: 0.9rem;
+  font-weight: 400;
+}
+
+.home-hotelaria header .btn-outline-secondary {
+  background: rgba(15, 23, 42, 0.35);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  border-radius: 30px;
+  transition: background-color 0.2s ease;
+}
+
+.home-hotelaria header .btn-outline-secondary:hover {
+  background: #ffffff;
+  color: #102b50;
+}
+
+@media (max-width: 767px) {
+  .home-hotelaria header > .row.g-3 {
+    margin-left: -25px;
+    margin-right: -25px;
+    padding: 22px 25px;
+  }
+
+  .home-hotelaria header > .row.g-3 > div::before {
+    inset: -5px 6px;
+  }
+
+  .home-hotelaria header > .row.g-3 > div {
+    margin-bottom: 8px;
+  }
+}
+
+
+.home-hotelaria header > .row.g-3 > div {
+  padding: 8px 24px !important;
+}
+
+.home-hotelaria header > .row.g-3 > div::before {
+  inset: 0 6px;
+  border-radius: 12px;
+}
+
+.home-hotelaria header > .row.g-3 strong {
+  margin-right: 8px;
+}
+
+.home-hotelaria header > .row.g-3 span {
+  line-height: 1.5;
+}
+
+
+
+body:has(.auth-hotelaria) {
+  background: #f4f3f1 !important;
+  min-height: 100vh;
+}
+
+.auth-hotelaria {
+  --auth-azul: #14243b;
+  --auth-bronze: #a36547;
+
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+
+  width: calc(100% - 60px) !important;
+  max-width: 1300px !important;
+  min-height: 620px;
+
+  margin: 45px auto !important;
+  padding: 0 !important;
+
+  background: #ffffff !important;
+
+  border: none !important;
+  border-radius: 24px !important;
+  overflow: hidden;
+
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.15) !important;
+}
+
+.auth-hotelaria::before {
+  content: "";
+
+  display: block;
+  grid-column: 1;
+  grid-row: 1;
+
+  width: 100%;
+  height: 100%;
+  min-height: 620px;
+
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(10, 25, 45, 0.1) 0%,
+      rgba(10, 25, 45, 0.25) 45%,
+      rgba(10, 25, 45, 0.85) 100%
+    ),
+    url("https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1600&q=85");
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  border-radius: 0;
+}
+
+.auth-hotelaria::after {
+  content: "REDE HOTELEIRA\A Sua próxima hospedagem começa aqui.";
+
+  white-space: pre-line;
+
+  grid-column: 1;
+  grid-row: 1;
+
+  align-self: end;
+  z-index: 1;
+
+  margin: 0 45px 50px;
+
+  color: #ffffff;
+
+  font-size: clamp(1.5rem, 2.2vw, 2.2rem);
+  font-weight: 700;
+  line-height: 1.4;
+
+  text-shadow: 0 3px 15px rgba(0, 0, 0, 0.45);
+
+  pointer-events: none;
+}
+
+.auth-hotelaria > .card-body {
+  grid-column: 2;
+  grid-row: 1;
+
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: stretch !important;
+
+  width: 100% !important;
+  min-width: 0;
+  min-height: 620px;
+
+  margin: 0 !important;
+  padding: 55px !important;
+
+  background: #ffffff !important;
+}
+
+.auth-hotelaria h2 {
+  color: var(--auth-azul) !important;
+
+  font-size: 2rem;
+  font-weight: 700;
+
+  margin-bottom: 30px !important;
+}
+
+.auth-hotelaria .btn-group {
+  display: flex !important;
+  flex-direction: row !important;
+
+  width: 100% !important;
+
+  padding: 5px;
+
+  background: #f1f5f9;
+
+  border-radius: 12px;
+
+  margin-bottom: 30px !important;
+}
+
+.auth-hotelaria .btn-group > .btn {
+  flex: 1 1 0;
+  width: 50%;
+
+  padding: 12px;
+
+  border: none !important;
+  border-radius: 9px !important;
+
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.auth-hotelaria .btn-group > .btn-primary {
+  background: var(--auth-azul) !important;
+  color: #ffffff !important;
+}
+
+.auth-hotelaria .btn-group > .btn-outline-primary {
+  background: transparent !important;
+  color: #64748b !important;
+}
+
+.auth-hotelaria form {
+  display: block !important;
+  width: 100% !important;
+}
+
+.auth-hotelaria form .mb-3 {
+  width: 100%;
+  margin-bottom: 22px !important;
+}
+
+.auth-hotelaria .form-label {
+  display: block;
+
+  color: #334155;
+
+  font-size: 0.9rem;
+  font-weight: 600;
+
+  margin-bottom: 9px;
+}
+
+.auth-hotelaria .form-control {
+  display: block;
+
+  width: 100% !important;
+  min-height: 52px;
+
+  padding: 12px 15px;
+
+  background: #f8fafc !important;
+  color: #24364b;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+
+  font-size: 0.95rem;
+}
+
+.auth-hotelaria .form-control:focus {
+  background: #ffffff !important;
+
+  border-color: var(--auth-bronze);
+
+  box-shadow: 0 0 0 3px rgba(163, 101, 71, 0.12);
+}
+
+.auth-hotelaria form > .btn-primary {
+  display: block;
+
+  width: 100% !important;
+  min-height: 52px;
+
+  margin-top: 12px;
+
+  background: var(--auth-bronze) !important;
+  color: #ffffff !important;
+
+  border: none !important;
+  border-radius: 10px !important;
+
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.auth-hotelaria form > .btn-primary:hover {
+  background: #854d35 !important;
+}
+
+.auth-hotelaria .alert {
+  width: 100%;
+  margin-top: 20px !important;
+  border-radius: 10px;
+}
+
+@media (max-width: 900px) {
+  .auth-hotelaria {
+    grid-template-columns: 1fr;
+
+    width: calc(100% - 30px) !important;
+    max-width: 550px !important;
+
+    min-height: auto;
+    margin: 25px auto !important;
+  }
+
+  .auth-hotelaria::before {
+    grid-column: 1;
+    grid-row: 1;
+
+    min-height: 240px;
+  }
+
+  .auth-hotelaria::after {
+    grid-column: 1;
+    grid-row: 1;
+
+    margin: 0 25px 25px;
+
+    font-size: 1.4rem;
+  }
+
+  .auth-hotelaria > .card-body {
+    grid-column: 1;
+    grid-row: 2;
+
+    min-height: auto;
+
+    padding: 35px 25px !important;
+  }
+}
+
+@media (max-width: 400px) {
+  .auth-hotelaria > .card-body {
+    padding: 25px 18px !important;
+  }
+}
