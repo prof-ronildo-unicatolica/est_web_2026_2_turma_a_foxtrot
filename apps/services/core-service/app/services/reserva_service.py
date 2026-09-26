@@ -70,3 +70,13 @@ def calcular_servicos_adicionais(
         total += servico.preco
 
     return total
+
+
+def calcular_desconto_nao_reembolsavel(
+    subtotal: Decimal,
+    nao_reembolsavel: bool = False,
+) -> Decimal:
+    if not nao_reembolsavel:
+        return Decimal("0.00")
+
+    return subtotal * Decimal("0.10")

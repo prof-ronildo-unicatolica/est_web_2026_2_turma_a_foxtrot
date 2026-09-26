@@ -7,9 +7,11 @@ from app.models.tarifa_temporada import TarifaTemporada
 from app.services.reserva_service import (
     calcular_adicional_criancas,
     calcular_adicional_horario,
+    calcular_desconto_nao_reembolsavel,
     calcular_diarias,
     calcular_servicos_adicionais,
 )
+
 
 
 def test_calcular_diarias_basicas():
@@ -113,3 +115,21 @@ def test_sem_servicos_adicionais_retorna_zero():
     )
 
     assert total == Decimal("0.00")
+
+
+def test_reserva_nao_reembolsavel_aplica_desconto_de_10_porcento():
+    desconto = calcular_desconto_nao_reembolsavel(
+        subtotal=Decimal("1000.00"),
+        nao_reembolsavel=True,
+    )
+
+    assert desconto == Decimal("100.00")
+
+
+def test_reserva_reembolsavel_nao_aplica_desconto():
+    desconto = calcular_desconto_nao_reembolsavel(
+        subtotal=Decimal("1000.00"),
+        nao_reembolsavel=False,
+    )
+
+    assert desconto == Decimal("0.00")
