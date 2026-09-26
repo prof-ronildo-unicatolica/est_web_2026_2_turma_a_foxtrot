@@ -105,8 +105,8 @@ export default function AuthForm() {
   }
 
   return (
-    <div className="card shadow-sm">
-      <div className="card-body p-4">
+    <div className="card shadow-sm auth-hotelaria">
+      <div className="card-body p-0">
         <h2 className="h4 text-primary fw-bold mb-4">
           {modo === 'login' ? 'Login' : 'Cadastro'}
         </h2>

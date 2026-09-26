@@ -164,7 +164,7 @@ function HomePage() {
   const hoteisFiltrados = hoteis
 
   return (
-    <div className="bg-light min-vh-100 pb-5">
+    <div className="home-hotelaria bg-light min-vh-100 pb-5">
 
       {/* =====================================================
           NAVBAR
@@ -202,27 +202,27 @@ function HomePage() {
             className="collapse navbar-collapse"
             id="navbarNav"
           >
-            <ul className="navbar-nav me-auto">
-
+            
+            <ul className="navbar-nav me-auto gap-lg-3">
               <li className="nav-item">
-                <Link
-                  className="nav-link active"
-                  to="/"
-                >
+                <Link className="nav-link active" to="/">
                   Início
                 </Link>
               </li>
 
               <li className="nav-item">
-                <a
-                  className="nav-link"
-                  href="#buscar-hoteis"
-                >
+                <a className="nav-link" href="#buscar-hoteis">
                   Buscar Hotéis
                 </a>
               </li>
 
+              <li className="nav-item">
+                <Link className="nav-link" to="/minhas-reservas">
+                  Minhas Reservas
+                </Link>
+              </li>
             </ul>
+
 
             <div className="d-flex align-items-center gap-2">
 
