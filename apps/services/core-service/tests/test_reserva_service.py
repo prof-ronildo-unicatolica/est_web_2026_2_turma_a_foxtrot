@@ -10,6 +10,7 @@ from app.services.reserva_service import (
     calcular_desconto_nao_reembolsavel,
     calcular_diarias,
     calcular_servicos_adicionais,
+    calcular_total_reserva,
 )
 
 
@@ -133,3 +134,37 @@ def test_reserva_reembolsavel_nao_aplica_desconto():
     )
 
     assert desconto == Decimal("0.00")
+
+
+def test_calcular_total_reserva_com_todas_as_regras():
+    tarifa = TarifaTemporada(
+        hotel_id=uuid4(),
+        nome="Alta temporada",
+        data_inicio=date(2026, 12, 21),
+        data_fim=date(2026, 12, 22),
+        multiplicador=Decimal("1.50"),
+    )
+
+    cafe = ServicoAdicional(
+        nome="Café da manhã",
+        preco=Decimal("50.00"),
+    )
+
+    estacionamento = ServicoAdicional(
+        nome="Estacionamento",
+        preco=Decimal("30.00"),
+    )
+
+    total = calcular_total_reserva(
+        preco_diaria=Decimal("200.00"),
+        data_checkin=date(2026, 12, 20),
+        data_checkout=date(2026, 12, 23),
+        tarifas_temporada=[tarifa],
+        idades_criancas=[4, 8],
+        early_checkin=True,
+        late_checkout=True,
+        servicos=[cafe, estacionamento],
+        nao_reembolsavel=True,
+    )
+
+    assert total == Decimal("1260.00")

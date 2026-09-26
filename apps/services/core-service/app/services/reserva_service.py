@@ -80,3 +80,54 @@ def calcular_desconto_nao_reembolsavel(
         return Decimal("0.00")
 
     return subtotal * Decimal("0.10")
+
+def calcular_total_reserva(
+    preco_diaria: Decimal,
+    data_checkin: date,
+    data_checkout: date,
+    tarifas_temporada: list[TarifaTemporada] | None = None,
+    idades_criancas: list[int] | None = None,
+    early_checkin: bool = False,
+    late_checkout: bool = False,
+    servicos: list[ServicoAdicional] | None = None,
+    nao_reembolsavel: bool = False,
+) -> Decimal:
+    tarifas_temporada = tarifas_temporada or []
+    idades_criancas = idades_criancas or []
+    servicos = servicos or []
+
+    total_diarias = calcular_diarias(
+        preco_diaria=preco_diaria,
+        data_checkin=data_checkin,
+        data_checkout=data_checkout,
+        tarifas_temporada=tarifas_temporada,
+    )
+
+    adicional_criancas = calcular_adicional_criancas(
+        total_diarias=total_diarias,
+        idades_criancas=idades_criancas,
+    )
+
+    adicional_horario = calcular_adicional_horario(
+        preco_diaria=preco_diaria,
+        early_checkin=early_checkin,
+        late_checkout=late_checkout,
+    )
+
+    total_servicos = calcular_servicos_adicionais(
+        servicos=servicos,
+    )
+
+    subtotal = (
+        total_diarias
+        + adicional_criancas
+        + adicional_horario
+        + total_servicos
+    )
+
+    desconto = calcular_desconto_nao_reembolsavel(
+        subtotal=subtotal,
+        nao_reembolsavel=nao_reembolsavel,
+    )
+
+    return subtotal - desconto
