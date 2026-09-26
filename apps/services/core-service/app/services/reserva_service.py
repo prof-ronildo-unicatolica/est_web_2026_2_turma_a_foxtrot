@@ -27,3 +27,19 @@ def calcular_diarias(
         data_diaria += timedelta(days=1)
 
     return total
+
+
+def calcular_adicional_criancas(
+    total_diarias: Decimal,
+    idades_criancas: list[int],
+) -> Decimal:
+    adicional = Decimal("0.00")
+
+    for idade in idades_criancas:
+        if 0 <= idade <= 5:
+            continue
+
+        if 6 <= idade <= 12:
+            adicional += total_diarias * Decimal("0.50")
+
+    return adicional

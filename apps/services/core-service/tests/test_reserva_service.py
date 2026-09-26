@@ -3,7 +3,10 @@ from decimal import Decimal
 from uuid import uuid4
 
 from app.models.tarifa_temporada import TarifaTemporada
-from app.services.reserva_service import calcular_diarias
+from app.services.reserva_service import (
+    calcular_adicional_criancas,
+    calcular_diarias,
+)
 
 
 def test_calcular_diarias_basicas():
@@ -33,3 +36,21 @@ def test_calcular_diarias_com_tarifa_temporada():
     )
 
     assert total == Decimal("800.00")
+
+
+def test_bebe_de_0_a_5_anos_nao_paga_adicional():
+    adicional = calcular_adicional_criancas(
+        total_diarias=Decimal("600.00"),
+        idades_criancas=[4],
+    )
+
+    assert adicional == Decimal("0.00")
+
+
+def test_crianca_de_6_a_12_anos_paga_50_porcento():
+    adicional = calcular_adicional_criancas(
+        total_diarias=Decimal("600.00"),
+        idades_criancas=[8],
+    )
+
+    assert adicional == Decimal("300.00")
