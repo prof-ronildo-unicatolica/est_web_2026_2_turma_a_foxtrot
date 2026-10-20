@@ -1,4 +1,3 @@
-from typing import TYPE_CHECKING
 from uuid import UUID
 
 from sqlalchemy import Column, ForeignKey, Integer, String, Table
@@ -8,10 +7,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.uuid_utils import gerar_uuid7
 from app.models.base import Base
 from app.models.cidade import Cidade
+from app.models.comodidade import Comodidade
 from app.models.quarto import Quarto
-
-if TYPE_CHECKING:
-    from app.models.comodidade import Comodidade
+from app.models.tarifa_temporada import TarifaTemporada
 
 
 hotel_comodidades = Table(
@@ -63,6 +61,11 @@ class Hotel(Base):
     )
 
     quartos: Mapped[list["Quarto"]] = relationship(
+        back_populates="hotel",
+        cascade="all, delete-orphan",
+    )
+
+    tarifas_temporada: Mapped[list["TarifaTemporada"]] = relationship(
         back_populates="hotel",
         cascade="all, delete-orphan",
     )
