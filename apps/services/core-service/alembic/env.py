@@ -24,6 +24,7 @@ from app.models.comodidade import Comodidade
 from app.models.quarto import Quarto
 from app.models.tarifa_temporada import TarifaTemporada
 from app.models.servico_adicional import ServicoAdicional
+from app.models.reserva import Reserva
 # Objeto de configuração do Alembic
 config = context.config
 
