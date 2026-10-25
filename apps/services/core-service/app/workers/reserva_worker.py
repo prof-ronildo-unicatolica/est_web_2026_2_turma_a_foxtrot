@@ -22,9 +22,7 @@ FILA_AUDITORIA = "audit.logs"
 
 def processar_reserva(db: Session, reserva_id: UUID) -> dict:
     """Processa uma reserva com bloqueio transacional por quarto."""
-
     try:
-        # Descobre o quarto da reserva antes de adquirir os bloqueios.
         reserva_info = db.execute(
             text("""
                 SELECT quarto_id
@@ -37,8 +35,7 @@ def processar_reserva(db: Session, reserva_id: UUID) -> dict:
         if not reserva_info:
             raise ValueError(f"Reserva {reserva_id} nao encontrada.")
 
-        # Serializa o processamento de reservas do mesmo quarto.
-        # O bloqueio é mantido até o commit ou rollback.
+        # Serializa o processamento das reservas do mesmo quarto.
         quarto = db.execute(
             text("""
                 SELECT id
@@ -82,6 +79,7 @@ def processar_reserva(db: Session, reserva_id: UUID) -> dict:
             ),
         }
 
+        # Evita processar novamente uma reserva já finalizada.
         if reserva["status"] != "Pendente":
             db.commit()
             return {
@@ -165,12 +163,12 @@ async def processar_mensagem(message: aio_pika.IncomingMessage):
 
             reserva_id = UUID(str(data["reserva_id"]))
 
-            # Simulação do processamento do pagamento.
+            # Simulacao do processamento do pagamento.
             await asyncio.sleep(2)
 
             resultado = processar_reserva(db, reserva_id)
 
-            # A auditoria é responsabilidade do audit_worker.
+            # A auditoria e responsabilidade do audit_worker.
             await publish_event(FILA_AUDITORIA, resultado)
 
             logger.info(
@@ -180,9 +178,8 @@ async def processar_mensagem(message: aio_pika.IncomingMessage):
             )
 
         except (ValueError, TypeError, json.JSONDecodeError) as exc:
-            # Mensagem inválida: registra o erro e não a reenvia.
+            # Mensagem invalida: registra o erro e nao a reenvia.
             logger.warning("Solicitacao invalida: %s", exc)
-            # A exceção é consumida; a mensagem será confirmada.
 
         except Exception:
             logger.exception("Falha ao processar reserva.")
