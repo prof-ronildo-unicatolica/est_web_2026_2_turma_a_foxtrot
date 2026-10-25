@@ -13,7 +13,7 @@ from app.api.v1.cidades import router as cidades_router
 from app.api.v1.hoteis import router as hoteis_router
 from app.api.v1.comodidades import router as comodidades_router
 from app.api.v1.quartos import router as quartos_router
-
+from app.api.v1.reservas import router as reservas_router 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -45,6 +45,7 @@ app.include_router(cidades_router, prefix=settings.API_V1_STR)
 app.include_router(hoteis_router, prefix=settings.API_V1_STR)
 app.include_router(comodidades_router, prefix=settings.API_V1_STR)
 app.include_router(quartos_router, prefix=settings.API_V1_STR)
+app.include_router(reservas_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/")
