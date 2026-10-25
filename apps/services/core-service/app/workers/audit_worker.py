@@ -1,4 +1,5 @@
-﻿import asyncio
+﻿
+import asyncio
 import json
 import logging
 from datetime import datetime, timezone
@@ -13,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 async def process_message(message: aio_pika.IncomingMessage):
-    async with message.process(requeue=False):
+    async with message.process(requeue=True):
         mongo_client = None
 
         try:
@@ -30,18 +31,31 @@ async def process_message(message: aio_pika.IncomingMessage):
                 "timestamp": datetime.now(timezone.utc).isoformat(),
             }
 
-            await db["logs_auditoria"].insert_one(documento)
+            if data.get("reserva_id"):
+                # Uma entrada por reserva, mesmo se a mensagem
+                # for entregue novamente pelo RabbitMQ.
+                chave = f"reserva:{data['reserva_id']}"
+                documento["_id"] = chave
+
+                await db["historico_auditoria"].update_one(
+                    {"_id": chave},
+                    {"$setOnInsert": documento},
+                    upsert=True,
+                )
+            else:
+                await db["historico_auditoria"].insert_one(documento)
 
             logger.info(
-                "Auditoria salva no MongoDB: %s",
+                "Auditoria salva: %s",
                 data.get("evento", "sem_evento"),
             )
 
-        except json.JSONDecodeError:
-            logger.exception("Mensagem recebida não contém JSON válido.")
+        except (json.JSONDecodeError, ValueError) as exc:
+            # Conteúdo inválido não deve entrar em um ciclo de reenvios.
+            logger.warning("Mensagem de auditoria invalida: %s", exc)
 
         except Exception:
-            logger.exception("Erro ao processar mensagem de auditoria.")
+            logger.exception("Erro ao processar auditoria.")
             raise
 
         finally:
@@ -50,9 +64,11 @@ async def process_message(message: aio_pika.IncomingMessage):
 
 
 async def main():
-    logger.info("Conectando ao RabbitMQ: %s", settings.RABBITMQ_URL)
+    logger.info("Conectando ao RabbitMQ.")
 
-    connection = await aio_pika.connect_robust(settings.RABBITMQ_URL)
+    connection = await aio_pika.connect_robust(
+        settings.RABBITMQ_URL
+    )
 
     async with connection:
         channel = await connection.channel()
@@ -63,7 +79,7 @@ async def main():
             durable=True,
         )
 
-        logger.info("Aguardando mensagens na fila audit.logs")
+        logger.info("Aguardando mensagens em audit.logs")
 
         await queue.consume(process_message)
         await asyncio.Future()
