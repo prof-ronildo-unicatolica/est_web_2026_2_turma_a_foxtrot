@@ -13,12 +13,14 @@ from app.models.quarto import Quarto
 from app.models.reserva import Reserva
 from app.models.servico_adicional import ServicoAdicional
 from app.models.tarifa_temporada import TarifaTemporada
+from app.models.usuario import Usuario
 from app.schemas.reserva import (
     ReservaCreate,
     ReservaCriadaResponse,
     ReservaResponse,
 )
 from app.services.reserva_service import calcular_total_reserva
+
 
 router = APIRouter(prefix="/reservas", tags=["Reservas"])
 
@@ -34,12 +36,14 @@ FILA_RESERVAS = "solicitacoes-reserva"
 async def criar_reserva(
     payload: ReservaCreate,
     db: Session = Depends(get_db),
-    usuario=Depends(get_current_user),
+    usuario: Usuario = Depends(get_current_user),
 ):
     # 1. Verifica se o quarto existe.
-    quarto = db.query(Quarto).filter(
-        Quarto.id == payload.quarto_id
-    ).first()
+    quarto = (
+        db.query(Quarto)
+        .filter(Quarto.id == payload.quarto_id)
+        .first()
+    )
 
     if quarto is None:
         raise HTTPException(
@@ -47,7 +51,7 @@ async def criar_reserva(
             detail="Quarto não encontrado.",
         )
 
-    # 2. Valida a capacidade do quarto.
+    # 2. Separa crianças de 0 a 5 anos das demais.
     idades_bebes = [
         idade for idade in payload.idades_criancas if idade <= 5
     ]
@@ -67,7 +71,7 @@ async def criar_reserva(
             detail="Quantidade de crianças excede a capacidade do quarto.",
         )
 
-    # 3. Busca tarifas sazonais aplicáveis ao hotel.
+    # 3. Busca as tarifas sazonais aplicáveis.
     tarifas = (
         db.query(TarifaTemporada)
         .filter(
@@ -98,7 +102,7 @@ async def criar_reserva(
                 detail="Um ou mais serviços adicionais não existem.",
             )
 
-    # 5. Calcula o preço no backend, sem confiar no frontend.
+    # 5. Calcula o valor no backend.
     try:
         valor_total = calcular_total_reserva(
             preco_diaria=Decimal(str(quarto.preco_diaria)),
@@ -150,15 +154,14 @@ async def criar_reserva(
         db.rollback()
         raise
 
-    # 7. Publica a solicitação para o worker.
+    # 7. Envia a solicitação para o worker RabbitMQ.
     try:
         await publish_event(
             FILA_RESERVAS,
             {"reserva_id": str(reserva.id)},
         )
     except Exception as exc:
-        # A reserva não pode permanecer pendente sem ter sido
-        # encaminhada para processamento.
+        # Tenta cancelar a reserva se ela ainda estiver pendente.
         try:
             db.refresh(reserva)
             if reserva.status == "Pendente":
@@ -171,8 +174,8 @@ async def criar_reserva(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=(
                 "Não foi possível encaminhar a reserva para "
-                "processamento. Consulte o estado da reserva antes "
-                "de tentar novamente."
+                "processamento. Consulte o estado da reserva "
+                "antes de tentar novamente."
             ),
         ) from exc
 
@@ -191,7 +194,7 @@ async def criar_reserva(
 def consultar_reserva(
     reserva_id: UUID,
     db: Session = Depends(get_db),
-    usuario=Depends(get_current_user),
+    usuario: Usuario = Depends(get_current_user),
 ):
     reserva = (
         db.query(Reserva)

@@ -33,7 +33,10 @@ class ReservaCreate(BaseModel):
                 "O check-out deve ser posterior ao check-in."
             )
 
-        if any(idade < 0 or idade > 12 for idade in self.idades_criancas):
+        if any(
+            idade < 0 or idade > 12
+            for idade in self.idades_criancas
+        ):
             raise ValueError(
                 "A idade das crianças deve estar entre 0 e 12 anos."
             )
@@ -41,7 +44,9 @@ class ReservaCreate(BaseModel):
         if len(set(self.servicos_adicionais_ids)) != len(
             self.servicos_adicionais_ids
         ):
-            raise ValueError("Existem serviços adicionais duplicados.")
+            raise ValueError(
+                "Existem serviços adicionais duplicados."
+            )
 
         return self
 
@@ -52,18 +57,14 @@ class ReservaResponse(BaseModel):
     id: UUID
     usuario_id: UUID
     quarto_id: UUID
-
     data_checkin: date
     data_checkout: date
-
     quantidade_adultos: int
     quantidade_criancas: int
     quantidade_bebes: int
-
     early_checkin: bool
     late_checkout: bool
     necessita_berco: bool
-
     tarifa_tipo: str
     data_limite_cancelamento: date | None
     valor_multa_cancelamento: Decimal
