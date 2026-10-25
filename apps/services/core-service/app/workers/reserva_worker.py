@@ -66,6 +66,19 @@ def processar_reserva(db: Session, reserva_id: UUID) -> dict:
 
     if checkout <= checkin:
         raise ValueError("O checkout deve ser posterior ao check-in.")
+    
+    
+    # Bloqueia o quarto para serializar o processamento das reservas.
+    db.execute(
+        text("""
+            SELECT id
+            FROM quartos
+            WHERE id = :quarto_id
+            FOR UPDATE
+        """),
+        {"quarto_id": reserva["quarto_id"]},
+    ).first()
+
 
     conflito = db.execute(
         text("""
