@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import Sidebar from './components/Sidebar'
 import AuthForm from './components/AuthForm'
 import MinhasReservas from './components/MinhasReservas'
+import CheckoutReserva from './components/CheckoutReserva'
 
 import {
   buscarCidades,
@@ -35,7 +36,7 @@ function HomePage() {
   const [erroHoteis, setErroHoteis] = useState(null)
 
   const [hotelSelecionado, setHotelSelecionado] = useState(null)
-
+  const [quartoSelecionado, setQuartoSelecionado] = useState(null)
   // =========================================================
   // CARREGAR INFORMAÇÕES DO SISTEMA
   // =========================================================
@@ -809,6 +810,14 @@ function HomePage() {
                                 <strong>Crianças:</strong>{' '}
                                 até {quarto.max_criancas}
                               </p>
+
+                              <button 
+                                className={`btn mt-3 w-100 ${quartoSelecionado?.id === quarto.id ? 'btn-primary' : 'btn-outline-primary'}`}
+                                onClick={() => setQuartoSelecionado(quarto)}
+                              >
+                                {quartoSelecionado?.id === quarto.id ? 'Quarto Selecionado' : 'Selecionar Quarto'}
+                              </button>
+
                             </div>
                           </div>
                         </div>
@@ -818,6 +827,15 @@ function HomePage() {
                     <p className="text-secondary mb-0">
                       Nenhum quarto cadastrado para este hotel.
                     </p>
+                  )}
+
+                  {quartoSelecionado && (
+                    <div className="mt-5 border-top pt-4">
+                      <CheckoutReserva 
+                        quartoId={quartoSelecionado.id} 
+                        token={localStorage.getItem('token') || ''} 
+                      />
+                    </div>
                   )}
 
                 </div>
