@@ -1,25 +1,27 @@
-
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 export default function AuthForm() {
-  const [modo, setModo] = useState('login')
+  const navigate = useNavigate()
 
+  const [modo, setModo] = useState('login')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
-
   const [nome, setNome] = useState('')
   const [confirmarSenha, setConfirmarSenha] = useState('')
-
   const [mensagem, setMensagem] = useState('')
+  const [carregando, setCarregando] = useState(false)
 
-  // LOGIN
   async function handleLogin(event) {
     event.preventDefault()
+    setMensagem('')
 
     if (!email || !senha) {
       setMensagem('Preencha e-mail e senha.')
       return
     }
+
+    setCarregando(true)
 
     try {
       const resposta = await fetch(
@@ -30,8 +32,8 @@ export default function AuthForm() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            email: email,
-            senha: senha,
+            email,
+            senha,
           }),
         }
       )
@@ -48,17 +50,22 @@ export default function AuthForm() {
         return
       }
 
+      // Armazena o token de autenticação
       localStorage.setItem('access_token', dados.access_token)
 
-      setMensagem('Login realizado com sucesso!')
+      // Redireciona automaticamente para a página inicial
+      navigate('/', { replace: true })
     } catch (erro) {
+      console.error('Erro no login:', erro)
       setMensagem('Não foi possível conectar ao servidor.')
+    } finally {
+      setCarregando(false)
     }
   }
 
-  // CADASTRO
   async function handleCadastro(event) {
     event.preventDefault()
+    setMensagem('')
 
     if (!nome || !email || !senha || !confirmarSenha) {
       setMensagem('Preencha todos os campos.')
@@ -70,6 +77,8 @@ export default function AuthForm() {
       return
     }
 
+    setCarregando(true)
+
     try {
       const resposta = await fetch(
         'http://127.0.0.1:8000/api/v1/auth/register',
@@ -79,9 +88,9 @@ export default function AuthForm() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            nome: nome,
-            email: email,
-            senha: senha,
+            nome,
+            email,
+            senha,
           }),
         }
       )
@@ -93,20 +102,24 @@ export default function AuthForm() {
         return
       }
 
-      setMensagem('Cadastro realizado com sucesso!')
+      setMensagem('Cadastro realizado com sucesso! Faça login.')
 
       setNome('')
-      setEmail('')
       setSenha('')
       setConfirmarSenha('')
+      setModo('login')
     } catch (erro) {
+      console.error('Erro no cadastro:', erro)
       setMensagem('Não foi possível conectar ao servidor.')
+    } finally {
+      setCarregando(false)
     }
   }
 
   return (
     <div className="card shadow-sm auth-hotelaria">
       <div className="card-body p-0">
+
         <h2 className="h4 text-primary fw-bold mb-4">
           {modo === 'login' ? 'Login' : 'Cadastro'}
         </h2>
@@ -146,7 +159,10 @@ export default function AuthForm() {
         {modo === 'login' && (
           <form onSubmit={handleLogin}>
             <div className="mb-3">
-              <label htmlFor="emailLogin" className="form-label">
+              <label
+                htmlFor="emailLogin"
+                className="form-label"
+              >
                 E-mail
               </label>
 
@@ -159,11 +175,15 @@ export default function AuthForm() {
                 onChange={(event) =>
                   setEmail(event.target.value)
                 }
+                required
               />
             </div>
 
             <div className="mb-3">
-              <label htmlFor="senhaLogin" className="form-label">
+              <label
+                htmlFor="senhaLogin"
+                className="form-label"
+              >
                 Senha
               </label>
 
@@ -176,14 +196,16 @@ export default function AuthForm() {
                 onChange={(event) =>
                   setSenha(event.target.value)
                 }
+                required
               />
             </div>
 
             <button
               type="submit"
               className="btn btn-primary w-100"
+              disabled={carregando}
             >
-              Entrar
+              {carregando ? 'Entrando...' : 'Entrar'}
             </button>
           </form>
         )}
@@ -207,6 +229,7 @@ export default function AuthForm() {
                 onChange={(event) =>
                   setNome(event.target.value)
                 }
+                required
               />
             </div>
 
@@ -227,6 +250,7 @@ export default function AuthForm() {
                 onChange={(event) =>
                   setEmail(event.target.value)
                 }
+                required
               />
             </div>
 
@@ -247,6 +271,7 @@ export default function AuthForm() {
                 onChange={(event) =>
                   setSenha(event.target.value)
                 }
+                required
               />
             </div>
 
@@ -267,23 +292,26 @@ export default function AuthForm() {
                 onChange={(event) =>
                   setConfirmarSenha(event.target.value)
                 }
+                required
               />
             </div>
 
             <button
               type="submit"
               className="btn btn-primary w-100"
+              disabled={carregando}
             >
-              Cadastrar
+              {carregando ? 'Cadastrando...' : 'Cadastrar'}
             </button>
           </form>
         )}
 
         {mensagem && (
-          <div className="alert alert-info mt-3">
+          <div className="alert alert-info mt-3" role="alert">
             {mensagem}
           </div>
         )}
+
       </div>
     </div>
   )
