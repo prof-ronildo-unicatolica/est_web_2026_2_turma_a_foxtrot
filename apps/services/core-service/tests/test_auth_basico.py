@@ -3,7 +3,6 @@
 from app.core.security import hash_password
 from app.models.usuario import Usuario
 
-
 BASE = "/api/v1/auth"
 
 

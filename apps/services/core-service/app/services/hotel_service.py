@@ -5,7 +5,6 @@ from app.models.hotel import Hotel
 from app.repositories.comodidade_repository import ComodidadeRepository
 from app.repositories.hotel_repository import CidadeRepository, HotelRepository
 
-
 # --- Excecoes de dominio -----------------------------------------------------
 
 
