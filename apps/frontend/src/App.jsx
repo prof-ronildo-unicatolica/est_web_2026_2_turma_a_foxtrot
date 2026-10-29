@@ -4,22 +4,66 @@ import Sidebar from './components/Sidebar'
 import AuthForm from './components/AuthForm'
 import MinhasReservas from './components/MinhasReservas'
 import CheckoutReserva from './components/CheckoutReserva'
-
 import {
   buscarCidades,
   buscarHoteis,
   buscarSobre,
 } from './services/api'
-
 function HomePage() {
+  const [usuarioLogado, setUsuarioLogado] = useState(false)
+  const [nomeUsuario, setNomeUsuario] = useState('')
+  const [verificandoSessao, setVerificandoSessao] = useState(true)
+
+  useEffect(() => {
+    const token = localStorage.getItem('access_token')
+    if (!token) {
+      setVerificandoSessao(false)
+      return
+    }
+
+    const controller = new AbortController()
+    async function verificarSessao() {
+      try {
+        const resposta = await fetch('http://localhost:8000/api/v1/auth/me', {
+          headers: { Authorization: `Bearer ${token}` },
+          signal: controller.signal,
+        })
+        if (!resposta.ok) {
+          localStorage.removeItem('access_token')
+          setUsuarioLogado(false)
+          setNomeUsuario('')
+          return
+        }
+        const usuario = await resposta.json()
+        setUsuarioLogado(true)
+        setNomeUsuario(usuario.nome || '')
+      } catch (erro) {
+        if (erro.name !== 'AbortError') {
+          console.error('Não foi possível validar a sessão:', erro)
+          setUsuarioLogado(false)
+          setNomeUsuario('')
+        }
+      } finally {
+        if (!controller.signal.aborted) setVerificandoSessao(false)
+      }
+    }
+    verificarSessao()
+    return () => controller.abort()
+  }, [])
+
+  function handleLogout() {
+    localStorage.removeItem('access_token')
+    setUsuarioLogado(false)
+    setNomeUsuario('')
+    setQuartoSelecionado(null)
+  }
+
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
-
   const [cidades, setCidades] = useState([])
   const [loadingCidades, setLoadingCidades] = useState(true)
   const [erroCidades, setErroCidades] = useState(null)
-
   const [filtros, setFiltros] = useState({
     cidade: '',
     checkin: '',
@@ -28,120 +72,94 @@ function HomePage() {
     criancas: 0,
     estrelas: '',
   })
-
   const [mostrarResultados, setMostrarResultados] = useState(false)
-
   const [hoteis, setHoteis] = useState([])
   const [loadingHoteis, setLoadingHoteis] = useState(false)
   const [erroHoteis, setErroHoteis] = useState(null)
-
   const [hotelSelecionado, setHotelSelecionado] = useState(null)
   const [quartoSelecionado, setQuartoSelecionado] = useState(null)
   // =========================================================
   // CARREGAR INFORMAÇÕES DO SISTEMA
   // =========================================================
-
   useEffect(() => {
     async function carregarDados() {
       try {
         setLoading(true)
         setError(null)
-
         const json = await buscarSobre()
-
         setData(json)
       } catch (err) {
         console.error(
           'Erro ao carregar informações do sistema:',
           err
         )
-
         setError(err.message)
       } finally {
         setLoading(false)
       }
     }
-
     carregarDados()
   }, [])
-
   // =========================================================
   // CARREGAR CIDADES DA API
   // =========================================================
-
   useEffect(() => {
     async function carregarCidades() {
       try {
         setLoadingCidades(true)
         setErroCidades(null)
-
         const json = await buscarCidades()
-
         console.log(
           'Cidades recebidas da API:',
           json
         )
-
         setCidades(Array.isArray(json) ? json : [])
       } catch (err) {
         console.error(
           'Erro ao carregar cidades:',
           err
         )
-
         setErroCidades(err.message)
         setCidades([])
       } finally {
         setLoadingCidades(false)
       }
     }
-
     carregarCidades()
   }, [])
-
   // =========================================================
   // ALTERAÇÃO DOS FILTROS
   // =========================================================
-
   function handleFiltroChange(event) {
     const { name, value } = event.target
-
     setFiltros((estadoAnterior) => ({
       ...estadoAnterior,
       [name]: value,
     }))
   }
-
   // =========================================================
   // BUSCAR HOTÉIS
   // =========================================================
-
   async function handleBuscarHoteis(event) {
     event.preventDefault()
-
     setMostrarResultados(true)
     setLoadingHoteis(true)
     setErroHoteis(null)
     setHoteis([])
     setHotelSelecionado(null)
-
     try {
       console.log(
         'Buscando hotéis para cidade:',
         filtros.cidade || 'todas'
       )
-
       const json = await buscarHoteis(
         filtros.cidade,
         filtros.estrelas
-
       )
-
       console.log(
         'Hotéis recebidos da API:',
         json
       )
-
       setHoteis(
         Array.isArray(json) ? json : []
       )
@@ -150,30 +168,23 @@ function HomePage() {
         'Erro ao buscar hotéis:',
         err
       )
-
       setErroHoteis(err.message)
       setHoteis([])
     } finally {
       setLoadingHoteis(false)
     }
   }
-
   // =========================================================
   // FILTRO DE ESTRELAS
   // =========================================================
-
   const hoteisFiltrados = hoteis
-
   return (
     <div className="home-hotelaria bg-light min-vh-100 pb-5">
-
       {/* =====================================================
           NAVBAR
       ====================================================== */}
-
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mb-4 sticky-top">
         <div className="container">
-
           <Link
             className="navbar-brand d-flex align-items-center"
             to="/"
@@ -181,12 +192,10 @@ function HomePage() {
             <span className="fs-4 fw-bold text-primary">
               Rede Hoteleira
             </span>
-
             <span className="ms-2 badge bg-secondary text-wrap small">
               Estágio II
             </span>
           </Link>
-
           <button
             className="navbar-toggler"
             type="button"
@@ -198,80 +207,71 @@ function HomePage() {
           >
             <span className="navbar-toggler-icon"></span>
           </button>
-
           <div
             className="collapse navbar-collapse"
             id="navbarNav"
           >
-            
             <ul className="navbar-nav me-auto gap-lg-3">
               <li className="nav-item">
                 <Link className="nav-link active" to="/">
                   Início
                 </Link>
               </li>
-
               <li className="nav-item">
                 <a className="nav-link" href="#buscar-hoteis">
                   Buscar Hotéis
                 </a>
               </li>
-
               <li className="nav-item">
                 <Link className="nav-link" to="/minhas-reservas">
                   Minhas Reservas
                 </Link>
               </li>
             </ul>
-
-
             <div className="d-flex align-items-center gap-2">
-
-              <Link
-                to="/login"
-                className="btn btn-outline-primary btn-sm px-3"
-              >
-                Login
-              </Link>
-
-              <button
-                className="btn btn-primary btn-sm px-3"
-                type="button"
-              >
-                Perfil
-              </button>
-
+              {verificandoSessao ? (
+                <span className="text-light small">Verificando sessão...</span>
+              ) : usuarioLogado ? (
+                <>
+                  <span className="text-light small">
+                    Olá, {nomeUsuario || 'Usuário'}
+                  </span>
+                  <button
+                    type="button"
+                    className="btn btn-outline-light btn-sm px-3"
+                    onClick={handleLogout}
+                  >
+                    Sair
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to="/login"
+                  className="btn btn-outline-primary btn-sm px-3"
+                >
+                  Login
+                </Link>
+              )}
             </div>
           </div>
         </div>
       </nav>
-
       {/* =====================================================
           CONTEÚDO
       ====================================================== */}
-
       <div className="container">
-
         {/* CABEÇALHO */}
-
         <header className="mb-5 p-4 bg-white rounded shadow-sm">
-
           <div className="row align-items-center">
-
             <div className="col-md-8">
-
               <h1 className="display-5 text-primary fw-bold">
                 Sistemas de Informação - Estágio II
               </h1>
-
               <p className="lead text-secondary mb-0">
                 Projeto Monorepo Base
               </p>
-
             </div>
-
             <div className="col-md-4 text-md-end mt-3 mt-md-0">
-
               <button
                 className="btn btn-sm btn-outline-secondary"
                 onClick={() =>
@@ -280,22 +280,16 @@ function HomePage() {
               >
                 Recarregar Dados
               </button>
-
             </div>
-
           </div>
-
           <hr className="my-4" />
-
           <div className="row g-3">
-
             <div className="col-md-3 col-sm-6">
               <strong>Equipe:</strong>{' '}
               <span className="text-secondary ms-1">
                 Foxtrot
               </span>
             </div>
-
             <div className="col-md-3 col-sm-6">
               <strong>Professor:</strong>{' '}
               <span className="text-secondary ms-1">
@@ -303,27 +297,21 @@ function HomePage() {
                   'Ronildo Silva'}
               </span>
             </div>
-
             <div className="col-md-3 col-sm-6">
               <strong>Ano:</strong>{' '}
               <span className="text-secondary ms-1">
                 {data?.ano || '2026'}
               </span>
             </div>
-
             <div className="col-md-3 col-sm-6">
               <strong>Semestre:</strong>{' '}
               <span className="text-secondary ms-1">
                 {data?.semestre || '2'}
               </span>
             </div>
-
           </div>
-
         </header>
-
         {/* ERRO DO BACKEND */}
-
         {error && (
           <div className="alert alert-danger shadow-sm">
             <strong>
@@ -332,51 +320,36 @@ function HomePage() {
             {error}
           </div>
         )}
-
         {/* =====================================================
             BUSCAR HOTÉIS
         ====================================================== */}
-
         <div className="row g-4">
-
           {/* SIDEBAR */}
-
           <div className="col-md-3">
             <Sidebar />
           </div>
-
           {/* CONTEÚDO */}
-
           <div
             className="col-md-9"
             id="buscar-hoteis"
           >
-
             <div className="card shadow-sm">
-
               <div className="card-body p-4">
-
                 <h2 className="h4 text-primary fw-bold mb-4">
                   Buscar Hotéis
                 </h2>
-
                 <form
                   onSubmit={handleBuscarHoteis}
                 >
-
                   <div className="row g-3">
-
                     {/* CIDADE */}
-
                     <div className="col-md-4">
-
                       <label
                         htmlFor="cidade"
                         className="form-label"
                       >
                         Cidade
                       </label>
-
                       <select
                         id="cidade"
                         name="cidade"
@@ -385,11 +358,9 @@ function HomePage() {
                         onChange={handleFiltroChange}
                         disabled={loadingCidades}
                       >
-
                         <option value="">
                           Todas as cidades
                         </option>
-
                         {cidades.map(
                           (cidade) => (
                             <option
@@ -400,34 +371,26 @@ function HomePage() {
                             </option>
                           )
                         )}
-
                       </select>
-
                       {loadingCidades && (
                         <div className="form-text">
                           Carregando cidades...
                         </div>
                       )}
-
                       {erroCidades && (
                         <div className="text-danger small mt-2">
                           {erroCidades}
                         </div>
                       )}
-
                     </div>
-
                     {/* CHECK-IN */}
-
                     <div className="col-md-4">
-
                       <label
                         htmlFor="checkin"
                         className="form-label"
                       >
                         Check-in
                       </label>
-
                       <input
                         type="date"
                         id="checkin"
@@ -436,20 +399,15 @@ function HomePage() {
                         value={filtros.checkin}
                         onChange={handleFiltroChange}
                       />
-
                     </div>
-
                     {/* CHECK-OUT */}
-
                     <div className="col-md-4">
-
                       <label
                         htmlFor="checkout"
                         className="form-label"
                       >
                         Check-out
                       </label>
-
                       <input
                         type="date"
                         id="checkout"
@@ -458,20 +416,15 @@ function HomePage() {
                         value={filtros.checkout}
                         onChange={handleFiltroChange}
                       />
-
                     </div>
-
                     {/* ADULTOS */}
-
                     <div className="col-md-4">
-
                       <label
                         htmlFor="adultos"
                         className="form-label"
                       >
                         Adultos
                       </label>
-
                       <input
                         type="number"
                         id="adultos"
@@ -481,20 +434,15 @@ function HomePage() {
                         value={filtros.adultos}
                         onChange={handleFiltroChange}
                       />
-
                     </div>
-
                     {/* CRIANÇAS */}
-
                     <div className="col-md-4">
-
                       <label
                         htmlFor="criancas"
                         className="form-label"
                       >
                         Crianças
                       </label>
-
                       <input
                         type="number"
                         id="criancas"
@@ -504,20 +452,15 @@ function HomePage() {
                         value={filtros.criancas}
                         onChange={handleFiltroChange}
                       />
-
                     </div>
-
                     {/* ESTRELAS */}
-
                     <div className="col-md-4">
-
                       <label
                         htmlFor="estrelas"
                         className="form-label"
                       >
                         Estrelas
                       </label>
-
                       <select
                         id="estrelas"
                         name="estrelas"
@@ -525,37 +468,27 @@ function HomePage() {
                         value={filtros.estrelas}
                         onChange={handleFiltroChange}
                       >
-
                         <option value="">
                           Todas as categorias
                         </option>
-
                         <option value="1">
                           ⭐ 1 estrela
                         </option>
-
                         <option value="2">
                           ⭐⭐ 2 estrelas
                         </option>
-
                         <option value="3">
                           ⭐⭐⭐ 3 estrelas
                         </option>
-
                         <option value="4">
                           ⭐⭐⭐⭐ 4 estrelas
                         </option>
-
                         <option value="5">
                           ⭐⭐⭐⭐⭐ 5 estrelas
                         </option>
-
                       </select>
-
                     </div>
-
                   </div>
-
                   <button
                     type="submit"
                     className="btn btn-primary mt-4 px-4"
@@ -565,33 +498,22 @@ function HomePage() {
                       ? 'Buscando...'
                       : 'Buscar hotéis'}
                   </button>
-
                 </form>
-
               </div>
             </div>
-
             {/* =================================================
                 RESULTADOS
             ================================================== */}
-
             {mostrarResultados && (
-
               <div className="mt-4">
-
                 <div className="card shadow-sm">
-
                   <div className="card-body p-4">
-
                     <h3 className="h5 text-primary fw-bold mb-4">
                       Hotéis encontrados
                     </h3>
-
                     {/* LOADING */}
-
                     {loadingHoteis && (
                       <div className="text-center py-4">
-
                         <div
                           className="spinner-border text-primary"
                           role="status"
@@ -600,24 +522,18 @@ function HomePage() {
                             Buscando hotéis...
                           </span>
                         </div>
-
                         <p className="mt-2 text-secondary">
                           Buscando hotéis...
                         </p>
-
                       </div>
                     )}
-
                     {/* ERRO */}
-
                     {erroHoteis && (
                       <div className="alert alert-danger">
                         {erroHoteis}
                       </div>
                     )}
-
                     {/* NENHUM HOTEL */}
-
                     {!loadingHoteis &&
                       !erroHoteis &&
                       hoteisFiltrados.length === 0 && (
@@ -627,33 +543,23 @@ function HomePage() {
                           selecionados.
                         </div>
                       )}
-
                     {/* HOTÉIS */}
-
                     {!loadingHoteis &&
                       !erroHoteis &&
                       hoteisFiltrados.length > 0 && (
-
                         <div className="row g-3">
-
                           {hoteisFiltrados.map(
                             (hotel) => (
-
                               <div
                                 className="col-md-6"
                                 key={hotel.id}
                               >
-
                                 <div className="card h-100 border">
-
                                   <div className="card-body">
-
                                     <h4 className="h5 fw-bold">
                                       {hotel.nome}
                                     </h4>
-
                                     <p className="mb-2">
-
                                       <span className="badge bg-primary">
                                         {'⭐'.repeat(
                                           Number(
@@ -661,9 +567,7 @@ function HomePage() {
                                           ) || 0
                                         )}
                                       </span>
-
                                     </p>
-
                                     <p className="mb-2">
                                       <strong>
                                         Categoria:
@@ -673,7 +577,6 @@ function HomePage() {
                                       }{' '}
                                       estrelas
                                     </p>
-
                                     {hotel.cidade && (
                                       <p className="text-secondary mb-3">
                                         <strong>
@@ -684,7 +587,6 @@ function HomePage() {
                                         }
                                       </p>
                                     )}
-
                                     <button
                                       type="button"
                                       className="btn btn-outline-primary"
@@ -696,44 +598,27 @@ function HomePage() {
                                     >
                                       Ver detalhes
                                     </button>
-
                                   </div>
-
                                 </div>
-
                               </div>
-
                             )
                           )}
-
                         </div>
-
                       )}
-
                   </div>
-
                 </div>
-
               </div>
-
             )}
-
             {/* =================================================
                 DETALHES DO HOTEL
             ================================================== */}
-
             {hotelSelecionado && (
-
               <div className="card shadow-sm mt-4">
-
                 <div className="card-body p-4">
-
                   <div className="d-flex justify-content-between align-items-center mb-3">
-
                     <h2 className="h4 text-primary fw-bold mb-0">
                       {hotelSelecionado.nome}
                     </h2>
-
                     <button
                       type="button"
                       className="btn btn-sm btn-outline-secondary"
@@ -743,9 +628,7 @@ function HomePage() {
                     >
                       Fechar
                     </button>
-
                   </div>
-
                   <p className="mb-2">
                     <span className="badge bg-primary">
                       {'⭐'.repeat(
@@ -755,7 +638,6 @@ function HomePage() {
                       )}
                     </span>
                   </p>
-
                   {hotelSelecionado.cidade && (
                     <p className="text-secondary">
                       <strong>
@@ -766,18 +648,14 @@ function HomePage() {
                       }
                     </p>
                   )}
-
                   <p className="mb-3">
                     <strong>ID:</strong>{' '}
                     {hotelSelecionado.hotel_id}
                   </p>
-
                   <hr />
-
                   <h3 className="h5 text-primary fw-bold mb-3">
                     Quartos
                   </h3>
-
                   {hotelSelecionado.quartos?.length > 0 ? (
                     <div className="row g-3">
                       {hotelSelecionado.quartos.map((quarto) => (
@@ -790,34 +668,28 @@ function HomePage() {
                               <h4 className="h6 fw-bold">
                                 Quarto {quarto.numero}
                               </h4>
-
                               <p className="mb-2">
                                 <strong>Tipo:</strong>{' '}
                                 {quarto.tipo}
                               </p>
-
                               <p className="mb-2">
                                 <strong>Diária:</strong>{' '}
                                 R$ {Number(quarto.preco_diaria).toFixed(2)}
                               </p>
-
                               <p className="mb-1">
                                 <strong>Adultos:</strong>{' '}
                                 até {quarto.max_adultos}
                               </p>
-
                               <p className="mb-0">
                                 <strong>Crianças:</strong>{' '}
                                 até {quarto.max_criancas}
                               </p>
-
-                              <button 
+                              <button
                                 className={`btn mt-3 w-100 ${quartoSelecionado?.id === quarto.id ? 'btn-primary' : 'btn-outline-primary'}`}
                                 onClick={() => setQuartoSelecionado(quarto)}
                               >
                                 {quartoSelecionado?.id === quarto.id ? 'Quarto Selecionado' : 'Selecionar Quarto'}
                               </button>
-
                             </div>
                           </div>
                         </div>
@@ -828,49 +700,43 @@ function HomePage() {
                       Nenhum quarto cadastrado para este hotel.
                     </p>
                   )}
-
                   {quartoSelecionado && (
                     <div className="mt-5 border-top pt-4">
-                      <CheckoutReserva 
-                        quartoId={quartoSelecionado.id} 
-                        token={localStorage.getItem('token') || ''} 
-                      />
+                      {usuarioLogado ? (
+                        <CheckoutReserva
+                          quartoId={quartoSelecionado.id}
+                          token={localStorage.getItem('access_token') || ''}
+                        />
+                      ) : (
+                        <div className="alert alert-info">
+                          Faça <Link to="/login">login</Link> para finalizar a reserva.
+                        </div>
+                      )}
                     </div>
                   )}
-
                 </div>
-
               </div>
-
             )}
-
           </div>
-
         </div>
-
         {/* RODAPÉ */}
-
         <footer className="text-center text-secondary mt-5 py-4">
           © 2026 - Disciplina de Estágio II.
           Desenvolvido pela Equipe Foxtrot.
         </footer>
-
       </div>
-
     </div>
   )
 }
-
 // =============================================================
 // APP
 // =============================================================
-
 export default function App() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<AuthForm />} />
-      <Route path="/minhas-reservas" element={<MinhasReservas />} /> 
+      <Route path="/minhas-reservas" element={<MinhasReservas />} />
     </Routes>
   )
 }
