@@ -28,3 +28,19 @@ export async function buscarReservaPorId(id, token) {
 
   return resposta.json()
 }
+export async function criarReserva(dadosReserva, token) {
+  const resposta = await fetch(`${API_URL}/reservas`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(dadosReserva),
+  });
+
+  if (!resposta.ok) {
+    throw new Error('Não foi possível enviar a reserva para processamento.');
+  }
+
+  return resposta.json();
+}
