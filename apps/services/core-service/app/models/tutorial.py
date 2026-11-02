@@ -6,8 +6,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
 
-
-
 # Tabela Associativa N:M entre Disciplina e Tecnologia
 disciplina_tecnologia = Table(
     "disciplina_tecnologia",

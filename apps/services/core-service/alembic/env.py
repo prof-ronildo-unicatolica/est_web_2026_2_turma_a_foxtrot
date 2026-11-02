@@ -7,24 +7,25 @@ from alembic import context
 # Importar modelos e configurações
 from app.core.config import settings
 from app.models.base import Base
+from app.models.cidade import Cidade
+from app.models.comodidade import Comodidade
+from app.models.hotel import Hotel
+from app.models.quarto import Quarto
+from app.models.reserva import Reserva
+from app.models.servico_adicional import ServicoAdicional
+from app.models.tarifa_temporada import TarifaTemporada
 
 # Importar os models para registrá-los no Base.metadata
 from app.models.tutorial import (
+    Disciplina,
+    Linguagem,
     Professor,
     ProfessorDetail,
-    Disciplina,
     Stack,
     Tecnologia,
-    Linguagem,
 )
 from app.models.usuario import Usuario
-from app.models.cidade import Cidade
-from app.models.hotel import Hotel
-from app.models.comodidade import Comodidade
-from app.models.quarto import Quarto
-from app.models.tarifa_temporada import TarifaTemporada
-from app.models.servico_adicional import ServicoAdicional
-from app.models.reserva import Reserva
+
 # Objeto de configuração do Alembic
 config = context.config
 

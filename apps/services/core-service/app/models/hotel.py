@@ -11,7 +11,6 @@ from app.models.comodidade import Comodidade
 from app.models.quarto import Quarto
 from app.models.tarifa_temporada import TarifaTemporada
 
-
 hotel_comodidades = Table(
     "hotel_comodidades",
     Base.metadata,

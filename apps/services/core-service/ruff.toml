@@ -20,3 +20,8 @@ fixable = ["ALL"]
 quote-style = "double"
 indent-style = "space"
 line-ending = "auto"
+
+[lint.per-file-ignores]
+"alembic/env.py" = ["F401"]
+"tests/conftest.py" = ["F401"]
+"tests/__init__.py" = ["F401"]

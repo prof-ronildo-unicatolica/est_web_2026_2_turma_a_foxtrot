@@ -1,28 +1,26 @@
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import configure_mappers, sessionmaker
 
 from app.core.database import get_db
 from app.main import app
 
 # Base principal
 from app.models.base import Base
-
-# Importar todos os models para registrá-los no Base.metadata
-from app.models.tutorial import (
-    Professor,
-    ProfessorDetail,
-    Disciplina,
-    Stack,
-    Tecnologia,
-    Linguagem,
-)
-from app.models.usuario import Usuario
 from app.models.cidade import Cidade
 from app.models.hotel import Hotel
 
-from sqlalchemy.orm import configure_mappers
+# Importar todos os models para registrá-los no Base.metadata
+from app.models.tutorial import (
+    Disciplina,
+    Linguagem,
+    Professor,
+    ProfessorDetail,
+    Stack,
+    Tecnologia,
+)
+from app.models.usuario import Usuario
 
 print("MODELS CARREGADOS NO CONFTEST:")
 print(sorted(Base.registry._class_registry.keys()))

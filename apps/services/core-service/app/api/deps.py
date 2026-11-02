@@ -1,16 +1,13 @@
 from uuid import UUID
 
-from fastapi import Depends, HTTPException, status
-
 import jwt
-
+from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.security import decode_access_token
 from app.models.usuario import Usuario
-
 
 bearer_scheme = HTTPBearer(
     description="Use o token retornado por POST /auth/login"

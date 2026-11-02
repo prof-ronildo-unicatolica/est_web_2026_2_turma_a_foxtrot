@@ -1,8 +1,8 @@
 from datetime import date, timedelta
 from decimal import Decimal
 
-from app.models.tarifa_temporada import TarifaTemporada
 from app.models.servico_adicional import ServicoAdicional
+from app.models.tarifa_temporada import TarifaTemporada
 
 
 def calcular_diarias(

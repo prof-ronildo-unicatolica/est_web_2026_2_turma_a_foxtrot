@@ -21,7 +21,6 @@ from app.schemas.reserva import (
 )
 from app.services.reserva_service import calcular_total_reserva
 
-
 router = APIRouter(prefix="/reservas", tags=["Reservas"])
 
 FILA_RESERVAS = "solicitacoes-reserva"
