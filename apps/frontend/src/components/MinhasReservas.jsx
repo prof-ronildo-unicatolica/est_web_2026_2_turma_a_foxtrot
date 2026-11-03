@@ -1,34 +1,12 @@
 
 import { Link } from 'react-router-dom'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { listarReservas } from '../services/reservas'
+import { buscarHoteis } from '../services/api'
 
-// Dados simulados para desenvolver a interface
-const reservas = [
-  {
-    id: 1,
-    hotel: 'Hotel Praia Azul',
-    quarto: 'Casal',
-    checkin: '10/10/2026',
-    checkout: '13/10/2026',
-    status: 'Pendente',
-  },
-  {
-    id: 2,
-    hotel: 'Vila dos Ventos Resort',
-    quarto: 'Casal Luxo',
-    checkin: '15/11/2026',
-    checkout: '18/11/2026',
-    status: 'Confirmada',
-  },
-  {
-    id: 3,
-    hotel: 'Hotel Praia Azul',
-    quarto: 'Família',
-    checkin: '20/10/2026',
-    checkout: '23/10/2026',
-    status: 'Cancelada',
-  },
-]
+
+
+
 
 const coresStatus = {
   Pendente: 'bg-warning text-dark',
@@ -38,9 +16,83 @@ const coresStatus = {
 
 export default function MinhasReservas() {
 
-    const [reservasExibidas, setReservasExibidas] = useState(reservas)
-    const [carregando, setCarregando] = useState(false)
+
+    const [reservasExibidas, setReservasExibidas] = useState([])
+    const [carregando, setCarregando] = useState(true)
     const [erro, setErro] = useState('')
+    const [quartosPorId, setQuartosPorId] = useState({})
+
+
+    useEffect(() => {
+      let ativo = true
+      const token = localStorage.getItem('access_token')
+
+      if (!token) {
+        setErro('Faça login para visualizar suas reservas.')
+        setCarregando(false)
+        return
+      }
+
+      async function carregarReservas() {
+        try {
+          const dados = await listarReservas(token)
+
+          if (ativo) {
+            setReservasExibidas(dados)
+          }
+        } catch (erro) {
+          if (ativo) {
+            setErro(erro.message || 'Erro ao carregar reservas.')
+          }
+        } finally {
+          if (ativo) {
+            setCarregando(false)
+          }
+        }
+      }
+
+      carregarReservas()
+
+      return () => {
+        ativo = false
+      }
+    }, [])
+
+
+    useEffect(() => {
+      let ativo = true
+
+      async function carregarDetalhesQuartos() {
+        try {
+          const hoteis = await buscarHoteis()
+          const mapa = {}
+
+          for (const hotel of hoteis) {
+            for (const quarto of hotel.quartos ?? []) {
+              mapa[quarto.id] = {
+                hotel: hotel.nome,
+                numero: quarto.numero,
+                tipo: quarto.tipo
+              }
+            }
+          }
+
+          if (ativo) {
+            setQuartosPorId(mapa)
+          }
+        } catch (erro) {
+          console.error('Erro ao buscar detalhes dos quartos:', erro)
+        }
+      }
+
+      carregarDetalhesQuartos()
+
+      return () => {
+        ativo = false
+      }
+    }, [])
+
+
 
   return (
     <div className="bg-light min-vh-100 py-5">
@@ -97,9 +149,9 @@ export default function MinhasReservas() {
                       <div className="card-body">
 
                         <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-                          <h3 className="h5 text-primary fw-bold mb-0">
-                            {reserva.hotel}
-                          </h3>
+                         <h3 className="h5 text-primary fw-bold mb-0">
+                          {quartosPorId[reserva.quarto_id]?.hotel || 'Reserva de hospedagem'}
+                        </h3>
 
                           <span
                             className={`badge ${coresStatus[reserva.status]}`}
@@ -112,17 +164,37 @@ export default function MinhasReservas() {
                           <strong>Reserva:</strong> #{reserva.id}
                         </p>
 
-                        <p className="mb-2">
-                          <strong>Quarto:</strong> {reserva.quarto}
-                        </p>
 
                         <p className="mb-2">
-                          <strong>Check-in:</strong> {reserva.checkin}
+                          <strong>Quarto:</strong>{' '}
+                          {quartosPorId[reserva.quarto_id]
+                            ? `${quartosPorId[reserva.quarto_id].numero} — ${quartosPorId[reserva.quarto_id].tipo}`
+                            : `ID: ${reserva.quarto_id}`}
                         </p>
+
+
+                        <p className="mb-2">
+                          <strong>Check-in:</strong>{' '}
+                          {reserva.data_checkin?.split('-').reverse().join('/')}
+                        </p>
+
+
 
                         <p className="mb-0">
-                          <strong>Check-out:</strong> {reserva.checkout}
+                          <strong>Check-out:</strong>{' '}
+                          {reserva.data_checkout?.split('-').reverse().join('/')}
                         </p>
+
+
+                        <p className="mb-0 mt-2">
+                          <strong>Valor total:</strong>{' '}
+                          {Number(reserva.valor_total).toLocaleString('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL'
+                          })}
+                        </p>
+
+
 
                       </div>
                     </div>
