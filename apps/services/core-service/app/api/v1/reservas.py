@@ -1,4 +1,3 @@
-
 from datetime import timedelta
 from decimal import Decimal
 from uuid import UUID
@@ -209,5 +208,22 @@ def consultar_reserva(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Reserva não encontrada.",
         )
-
     return reserva
+
+@router.get(
+    "",
+    response_model=list[ReservaResponse],
+    summary="Lista as reservas do usuário autenticado",
+)
+def listar_minhas_reservas(
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_current_user),
+):
+    reservas = (
+        db.query(Reserva)
+        .filter(Reserva.usuario_id == usuario.id)
+        .order_by(Reserva.data_checkin.desc())
+        .all()
+    )
+
+    return reservas
