@@ -1,12 +1,21 @@
-from motor.motor_asyncio import AsyncIOMotorClient
+
+from fastapi import Request
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.core.config import settings
 
 # --- Configuração do PostgreSQL ---
-engine = create_engine(settings.SQLALCHEMY_DATABASE_URI, pool_pre_ping=True)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+engine = create_engine(
+    settings.SQLALCHEMY_DATABASE_URI,
+    pool_pre_ping=True,
+)
+
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine,
+)
 
 
 def get_db():
@@ -17,10 +26,6 @@ def get_db():
         db.close()
 
 
-# --- Configuração do MongoDB ---
-mongo_client = AsyncIOMotorClient(settings.MONGODB_URL)
-mongo_db = mongo_client[settings.MONGODB_DB]
-
-
-def get_mongo_db():
-    return mongo_db
+# --- Conexão MongoDB gerenciada pela aplicação ---
+def get_mongo_db(request: Request):
+    return request.app.state.mongo_db
