@@ -5,6 +5,11 @@ from sqlalchemy.orm import configure_mappers, sessionmaker
 
 from app.core.database import get_db
 from app.main import app
+from app.core.config import settings
+
+
+# Ativa o modo de teste
+settings.TESTING = True
 
 # Base principal
 from app.models.base import Base

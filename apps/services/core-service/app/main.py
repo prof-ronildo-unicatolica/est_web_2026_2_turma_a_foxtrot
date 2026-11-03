@@ -22,39 +22,37 @@ from app.services.catalogo_hotel_service import CatalogoHotelService
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Cria uma nova conexão MongoDB para esta inicialização.
     mongo_client = AsyncIOMotorClient(settings.MONGODB_URL)
     app.state.mongo_db = mongo_client[settings.MONGODB_DB]
 
     try:
-        # Inicializa os dados do MongoDB.
         await seed_mongo_users(app.state.mongo_db)
 
-        # Sincroniza os hotéis do PostgreSQL com o MongoDB.
-        db = SessionLocal()
+        if not settings.TESTING:
+            db = SessionLocal()
 
-        try:
-            hoteis = db.query(Hotel.id).all()
-            catalogo = CatalogoHotelService(
-                db,
-                app.state.mongo_db,
-            )
+            try:
+                hoteis = db.query(Hotel.id).all()
 
-            for (hotel_id,) in hoteis:
-                await catalogo.sincronizar_hotel(hotel_id)
+                catalogo = CatalogoHotelService(
+                    db,
+                    app.state.mongo_db,
+                )
 
-            print(
-                f"Catálogo MongoDB sincronizado: {len(hoteis)} hotéis",
-                flush=True,
-            )
+                for (hotel_id,) in hoteis:
+                    await catalogo.sincronizar_hotel(hotel_id)
 
-        finally:
-            db.close()
+                print(
+                    f"Catálogo MongoDB sincronizado: {len(hoteis)} hotéis",
+                    flush=True,
+                )
+
+            finally:
+                db.close()
 
         yield
 
     finally:
-        # Encerra a conexão junto com a aplicação.
         mongo_client.close()
         app.state.mongo_db = None
 
