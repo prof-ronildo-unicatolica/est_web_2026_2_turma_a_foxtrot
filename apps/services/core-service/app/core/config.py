@@ -8,6 +8,9 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Sistema de Reservas - Core Service"
     API_V1_STR: str = "/api/v1"
 
+    # Modo de execução dos testes
+    TESTING: bool = False
+
 
      # Configurações de autenticação JWT
     SECRET_KEY: str = "dev-secret-key-change-in-production-123456789"
