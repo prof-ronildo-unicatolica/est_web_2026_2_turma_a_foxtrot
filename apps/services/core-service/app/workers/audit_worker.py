@@ -23,18 +23,23 @@ async def process_message(message: aio_pika.IncomingMessage):
             if not isinstance(data, dict):
                 raise ValueError("A mensagem deve ser um objeto JSON.")
 
+            evento = data.get("evento", "sem_evento")
+            reserva_id = data.get("reserva_id")
+
             mongo_client = AsyncIOMotorClient(settings.MONGODB_URL)
             db = mongo_client[settings.MONGODB_DB]
 
             documento = {
                 **data,
+                "evento": evento,
                 "timestamp": datetime.now(timezone.utc).isoformat(),
             }
 
-            if data.get("reserva_id"):
-                # Uma entrada por reserva, mesmo se a mensagem
-                # for entregue novamente pelo RabbitMQ.
-                chave = f"reserva:{data['reserva_id']}"
+            if reserva_id:
+                # Identifica cada evento separadamente por reserva.
+                # Evita duplicacao se a mensagem for reenviada.
+                chave = f"reserva:{reserva_id}:{evento}"
+
                 documento["_id"] = chave
 
                 await db["historico_auditoria"].update_one(
@@ -42,20 +47,28 @@ async def process_message(message: aio_pika.IncomingMessage):
                     {"$setOnInsert": documento},
                     upsert=True,
                 )
+
             else:
-                await db["historico_auditoria"].insert_one(documento)
+                await db["historico_auditoria"].insert_one(
+                    documento
+                )
 
             logger.info(
-                "Auditoria salva: %s",
-                data.get("evento", "sem_evento"),
+                "Auditoria salva: %s | Reserva: %s",
+                evento,
+                reserva_id or "nao informada",
             )
 
         except (json.JSONDecodeError, ValueError) as exc:
-            # Conteúdo inválido não deve entrar em um ciclo de reenvios.
-            logger.warning("Mensagem de auditoria invalida: %s", exc)
+            logger.warning(
+                "Mensagem de auditoria invalida: %s",
+                exc,
+            )
 
         except Exception:
-            logger.exception("Erro ao processar auditoria.")
+            logger.exception(
+                "Erro ao processar auditoria."
+            )
             raise
 
         finally:
@@ -79,7 +92,9 @@ async def main():
             durable=True,
         )
 
-        logger.info("Aguardando mensagens em audit.logs")
+        logger.info(
+            "Aguardando mensagens em audit.logs"
+        )
 
         await queue.consume(process_message)
         await asyncio.Future()
