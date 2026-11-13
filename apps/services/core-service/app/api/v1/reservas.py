@@ -1,4 +1,4 @@
-from datetime import timedelta
+
 from decimal import Decimal
 from uuid import UUID
 
@@ -19,6 +19,9 @@ from app.schemas.reserva import (
     ReservaResponse,
 )
 from app.services.reserva_service import calcular_total_reserva
+from app.services.politica_cancelamento import (
+    calcular_data_limite_cancelamento,
+)
 
 router = APIRouter(prefix="/reservas", tags=["Reservas"])
 
@@ -29,7 +32,7 @@ FILA_RESERVAS = "solicitacoes-reserva"
     "",
     response_model=ReservaCriadaResponse,
     status_code=status.HTTP_202_ACCEPTED,
-    summary="Solicita uma reserva assíncrona",
+    summary="Solicita uma reserva assincrona",
 )
 async def criar_reserva(
     payload: ReservaCreate,
@@ -46,10 +49,10 @@ async def criar_reserva(
     if quarto is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Quarto não encontrado.",
+            detail="Quarto nao encontrado.",
         )
 
-    # 2. Separa crianças de 0 a 5 anos das demais.
+    # 2. Separa criancas de 0 a 5 anos das demais.
     idades_bebes = [
         idade for idade in payload.idades_criancas if idade <= 5
     ]
@@ -66,10 +69,10 @@ async def criar_reserva(
     if len(idades_criancas) > quarto.max_criancas:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Quantidade de crianças excede a capacidade do quarto.",
+            detail="Quantidade de criancas excede a capacidade do quarto.",
         )
 
-    # 3. Busca as tarifas sazonais aplicáveis.
+    # 3. Busca as tarifas sazonais aplicaveis.
     tarifas = (
         db.query(TarifaTemporada)
         .filter(
@@ -80,7 +83,7 @@ async def criar_reserva(
         .all()
     )
 
-    # 4. Busca os serviços adicionais selecionados.
+    # 4. Busca os servicos adicionais selecionados.
     servicos = []
 
     if payload.servicos_adicionais_ids:
@@ -97,7 +100,7 @@ async def criar_reserva(
         if len(servicos) != len(payload.servicos_adicionais_ids):
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Um ou mais serviços adicionais não existem.",
+                detail="Um ou mais servicos adicionais nao existem.",
             )
 
     # 5. Calcula o valor no backend.
@@ -118,7 +121,7 @@ async def criar_reserva(
     except (ValueError, ArithmeticError) as exc:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Não foi possível calcular o preço da reserva.",
+            detail="Nao foi possivel calcular o preco da reserva.",
         ) from exc
 
     # 6. Cria a reserva pendente.
@@ -134,10 +137,9 @@ async def criar_reserva(
         late_checkout=payload.late_checkout,
         necessita_berco=payload.necessita_berco,
         tarifa_tipo=payload.tarifa_tipo,
-        data_limite_cancelamento=(
-            payload.data_checkin - timedelta(days=1)
-            if payload.tarifa_tipo == "flexivel"
-            else None
+        data_limite_cancelamento=calcular_data_limite_cancelamento(
+            data_checkin=payload.data_checkin,
+            tarifa_tipo=payload.tarifa_tipo,
         ),
         valor_multa_cancelamento=Decimal("0.00"),
         valor_total=valor_total,
@@ -152,7 +154,7 @@ async def criar_reserva(
         db.rollback()
         raise
 
-    # 7. Envia a solicitação para o worker RabbitMQ.
+    # 7. Envia a solicitacao para o worker RabbitMQ.
     try:
         await publish_event(
             FILA_RESERVAS,
@@ -171,7 +173,7 @@ async def criar_reserva(
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=(
-                "Não foi possível encaminhar a reserva para "
+                "Nao foi possivel encaminhar a reserva para "
                 "processamento. Consulte o estado da reserva "
                 "antes de tentar novamente."
             ),
@@ -206,14 +208,15 @@ def consultar_reserva(
     if reserva is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Reserva não encontrada.",
+            detail="Reserva nao encontrada.",
         )
     return reserva
+
 
 @router.get(
     "",
     response_model=list[ReservaResponse],
-    summary="Lista as reservas do usuário autenticado",
+    summary="Lista as reservas do usuario autenticado",
 )
 def listar_minhas_reservas(
     db: Session = Depends(get_db),
