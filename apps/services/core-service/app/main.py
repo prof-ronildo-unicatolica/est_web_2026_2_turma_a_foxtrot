@@ -26,9 +26,9 @@ async def lifespan(app: FastAPI):
     app.state.mongo_db = mongo_client[settings.MONGODB_DB]
 
     try:
-        await seed_mongo_users(app.state.mongo_db)
-
         if not settings.TESTING:
+            await seed_mongo_users(app.state.mongo_db)
+
             db = SessionLocal()
 
             try:

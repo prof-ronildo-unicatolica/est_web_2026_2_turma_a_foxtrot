@@ -1,4 +1,4 @@
-
+from datetime import date
 from decimal import Decimal
 from uuid import UUID
 
@@ -18,9 +18,9 @@ from app.schemas.reserva import (
     ReservaCriadaResponse,
     ReservaResponse,
 )
-from app.services.reserva_service import calcular_total_reserva
 from app.services.politica_cancelamento import (
     calcular_data_limite_cancelamento,
+    calcular_multa_cancelamento,
 )
 
 router = APIRouter(prefix="/reservas", tags=["Reservas"])
@@ -212,7 +212,6 @@ def consultar_reserva(
         )
     return reserva
 
-
 @router.get(
     "",
     response_model=list[ReservaResponse],
@@ -230,3 +229,116 @@ def listar_minhas_reservas(
     )
 
     return reservas
+
+@router.post(
+    "/{reserva_id}/cancelar",
+    summary="Cancela uma reserva do usuário autenticado",
+)
+async def cancelar_reserva(
+    reserva_id: UUID,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_current_user),
+):
+    # Busca apenas reservas pertencentes ao usuário autenticado.
+    reserva = (
+        db.query(Reserva)
+        .filter(
+            Reserva.id == reserva_id,
+            Reserva.usuario_id == usuario.id,
+        )
+        .first()
+    )
+
+    if reserva is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Reserva não encontrada.",
+        )
+
+    if reserva.status == "Cancelada":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Esta reserva já está cancelada.",
+        )
+
+    if reserva.status not in ("Pendente", "Confirmada"):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Esta reserva não permite cancelamento.",
+        )
+
+    # Consulta o preço-base da diária do quarto.
+    quarto = (
+        db.query(Quarto)
+        .filter(Quarto.id == reserva.quarto_id)
+        .first()
+    )
+
+    if quarto is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Quarto da reserva não encontrado.",
+        )
+
+    # Utiliza a política de multa implementada pelo Rhuan.
+    try:
+        multa = calcular_multa_cancelamento(
+            tarifa_tipo=reserva.tarifa_tipo,
+            data_checkin=reserva.data_checkin,
+            data_cancelamento=date.today(),
+            valor_total=reserva.valor_total,
+            valor_diaria=quarto.preco_diaria,
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(exc),
+        ) from exc
+
+    reserva.valor_multa_cancelamento = multa
+    reserva.status = "Cancelada"
+
+    try:
+        db.commit()
+        db.refresh(reserva)
+    except Exception:
+        db.rollback()
+        raise
+
+    # O cancelamento já foi salvo no banco.
+    # A auditoria é enviada em seguida.
+    try:
+        await publish_event(
+            "audit.logs",
+            {
+                "evento": "reserva.cancelada",
+                "reserva_id": str(reserva.id),
+                "usuario_id": str(usuario.id),
+                "quarto_id": str(reserva.quarto_id),
+                "status": reserva.status,
+                "tarifa_tipo": reserva.tarifa_tipo,
+                "valor_total": str(reserva.valor_total),
+                "valor_multa_cancelamento": str(
+                    reserva.valor_multa_cancelamento
+                ),
+            },
+        )
+    except Exception:
+        # Não desfaz o cancelamento já confirmado no banco.
+        # A falha precisa ser registrada e tratada posteriormente.
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=(
+                "Reserva cancelada, mas não foi possível enviar "
+                "o evento de auditoria. Consulte o estado da "
+                "reserva antes de tentar novamente."
+            ),
+        )
+
+    return {
+        "reserva_id": str(reserva.id),
+        "status": reserva.status,
+        "valor_multa_cancelamento": str(
+            reserva.valor_multa_cancelamento
+        ),
+    }
