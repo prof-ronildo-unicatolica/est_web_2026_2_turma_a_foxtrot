@@ -14,6 +14,7 @@ from app.models.quarto import Quarto
 from app.models.reserva import Reserva
 from app.models.servico_adicional import ServicoAdicional
 from app.models.tarifa_temporada import TarifaTemporada
+from app.models.avaliacao import Avaliacao
 
 # Importar os models para registrá-los no Base.metadata
 from app.models.tutorial import (

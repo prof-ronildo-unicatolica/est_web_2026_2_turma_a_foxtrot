@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
@@ -136,6 +136,23 @@ def listar_hoteis(
         return HotelService(db).listar(cidade_id=cidade_id)
 
     except CidadeNaoEncontradaError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        ) from e
+@router.get(
+    "/{hotel_id}",
+    response_model=HotelResponseSchema,
+    summary="Consulta os detalhes de um hotel",
+)
+def obter_detalhe_hotel(
+    hotel_id: uuid.UUID,
+    db: Session = Depends(get_db),
+):
+    try:
+        return HotelService(db).obter_detalhe(hotel_id)
+
+    except HotelNaoEncontradoError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e),
