@@ -1,3 +1,4 @@
+
 from typing import List
 from uuid import UUID
 
@@ -18,11 +19,7 @@ class CidadeResponseSchema(BaseModel):
 
 
 class HotelCreateSchema(BaseModel):
-    """O que o cliente envia em POST /hoteis.
-
-    A cidade entra como ID, nao como objeto: assim nao ha duvida se e para
-    reaproveitar uma cidade existente ou criar uma nova (e sempre reaproveitar).
-    """
+    """O que o cliente envia em POST /hoteis."""
 
     nome: str = Field(min_length=1, max_length=100)
     cidade_id: UUID
@@ -30,11 +27,7 @@ class HotelCreateSchema(BaseModel):
 
 
 class HotelResponseSchema(BaseModel):
-    """O que a API devolve.
-
-    A cidade vem ANINHADA e completa: sem isso o frontend precisaria de uma
-    requisicao extra por hotel so para descobrir o nome da cidade.
-    """
+    """O que a API devolve."""
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -42,13 +35,11 @@ class HotelResponseSchema(BaseModel):
     nome: str
     categoria_estrelas: int
     cidade: CidadeResponseSchema
+    media_avaliacoes: float = 0.0
+    quantidade_avaliacoes: int = 0
 
 
 class CidadeComHoteisSchema(CidadeResponseSchema):
-    """Cidade com a lista de hoteis dentro. Usada so onde ela for pedida
-    explicitamente -- ver a nota sobre recursao infinita no item 4.
-    """
-
     hoteis: List[HotelResponseSchema] = []
 
 
@@ -61,6 +52,7 @@ class ComodidadeResponseSchema(BaseModel):
     nome: str
 
     model_config = ConfigDict(from_attributes=True)
+
 
 class QuartoCreateSchema(BaseModel):
     hotel_id: UUID

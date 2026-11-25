@@ -1,4 +1,4 @@
-from datetime import date
+﻿from datetime import date
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -13,8 +13,6 @@ def validar_reserva_para_avaliacao(
     usuario_id: UUID,
 ) -> Reserva:
     """Valida se uma reserva pode ser avaliada conforme a RFO12."""
-
-    # 1. Busca a reserva pertencente ao usuario autenticado.
     reserva = (
         db.query(Reserva)
         .filter(
@@ -30,14 +28,12 @@ def validar_reserva_para_avaliacao(
             detail="Reserva nao encontrada.",
         )
 
-    # 2. Apenas reservas confirmadas podem ser avaliadas.
     if reserva.status != "Confirmada":
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Apenas reservas confirmadas podem ser avaliadas.",
         )
 
-    # 3. O check-out deve estar no passado.
     if reserva.data_checkout >= date.today():
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,

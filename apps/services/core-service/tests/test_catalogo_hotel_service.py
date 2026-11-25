@@ -1,11 +1,12 @@
+
 from decimal import Decimal
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
-from app.repositories.catalogo_hotel_repository import CatalogoHotelRepository
 
 import asyncio
 
+from app.repositories.catalogo_hotel_repository import CatalogoHotelRepository
 from app.services.catalogo_hotel_service import (
     CatalogoHotelService,
     HotelNaoEncontradoParaCatalogoError,
@@ -42,7 +43,13 @@ def test_sincronizar_hotel_substitui_documento_no_mongo():
         ],
     )
 
-    service = CatalogoHotelService(MagicMock(), MagicMock())
+    db = MagicMock()
+    db.query.return_value.filter.return_value.first.return_value = (
+        4.5,
+        2,
+    )
+
+    service = CatalogoHotelService(db, MagicMock())
     service.hoteis.get_by_id = MagicMock(return_value=hotel)
     service.catalogo.substituir_hotel = AsyncMock()
 
@@ -56,6 +63,8 @@ def test_sincronizar_hotel_substitui_documento_no_mongo():
     assert argumentos["hotel_id"] == str(hotel_id)
     assert documento["nome"] == "Hotel Teste"
     assert documento["categoria_estrelas"] == 4
+    assert documento["media_avaliacoes"] == 4.5
+    assert documento["quantidade_avaliacoes"] == 2
     assert documento["cidade"]["nome"] == "Limoeiro do Norte"
     assert documento["comodidades"][0]["nome"] == "Piscina"
     assert documento["quartos"][0]["numero"] == "101"
@@ -103,6 +112,7 @@ def test_substituir_hotel_usa_replace_one_com_upsert():
         documento,
         upsert=True,
     )
+
 
 def test_buscar_por_filtros_filtra_por_cidade():
     mongo_db = MagicMock()
