@@ -1,9 +1,13 @@
+
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from app.models.avaliacao import Avaliacao
 from app.models.cidade import Cidade
 from app.models.hotel import Hotel
 from app.repositories.comodidade_repository import ComodidadeRepository
 from app.repositories.hotel_repository import CidadeRepository, HotelRepository
+
 
 # --- Excecoes de dominio -----------------------------------------------------
 
@@ -58,6 +62,7 @@ class CidadeService:
 
 class HotelService:
     def __init__(self, db: Session):
+        self.db = db
         self.repository = HotelRepository(db)
         self.cidades = CidadeRepository(db)
         self.comodidades = ComodidadeRepository(db)
@@ -105,6 +110,52 @@ class HotelService:
             comodidade=comodidade,
         )
 
+    def _anexar_estatisticas_avaliacoes(
+        self,
+        hoteis: list[Hotel],
+    ) -> list[Hotel]:
+        if not hoteis:
+            return hoteis
+
+        hotel_ids = [hotel.id for hotel in hoteis]
+
+        resultados = (
+            self.db.query(
+                Avaliacao.hotel_id,
+                func.avg(Avaliacao.nota),
+                func.count(Avaliacao.id),
+            )
+            .filter(Avaliacao.hotel_id.in_(hotel_ids))
+            .group_by(Avaliacao.hotel_id)
+            .all()
+        )
+
+        estatisticas = {
+            hotel_id: (float(media), quantidade)
+            for hotel_id, media, quantidade in resultados
+        }
+
+        for hotel in hoteis:
+            media, quantidade = estatisticas.get(
+                hotel.id,
+                (0.0, 0),
+            )
+            hotel.media_avaliacoes = round(media, 2)
+            hotel.quantidade_avaliacoes = quantidade
+
+        return hoteis
+
+    def obter_detalhe(self, hotel_id) -> Hotel:
+        hotel = self.repository.get_by_id(hotel_id)
+
+        if not hotel:
+            raise HotelNaoEncontradoError(
+                f"Nao existe hotel com id '{hotel_id}'."
+            )
+
+        self._anexar_estatisticas_avaliacoes([hotel])
+        return hotel
+
     def listar(self, cidade_id=None) -> list[Hotel]:
         if cidade_id is not None:
             if not self.cidades.get_by_id(cidade_id):
@@ -112,6 +163,8 @@ class HotelService:
                     f"Nao existe cidade com id '{cidade_id}'."
                 )
 
-            return self.repository.list_by_cidade(cidade_id)
+            hoteis = self.repository.list_by_cidade(cidade_id)
+        else:
+            hoteis = self.repository.list()
 
-        return self.repository.list()
+        return self._anexar_estatisticas_avaliacoes(hoteis)

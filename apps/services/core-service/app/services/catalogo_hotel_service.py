@@ -1,9 +1,12 @@
+
 from typing import Any
 from uuid import UUID
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from app.models.avaliacao import Avaliacao
 from app.repositories.catalogo_hotel_repository import CatalogoHotelRepository
 from app.repositories.hotel_repository import HotelRepository
 
@@ -20,6 +23,7 @@ class CatalogoHotelService:
         db: Session,
         mongo_db: AsyncIOMotorDatabase,
     ):
+        self.db = db
         self.hoteis = HotelRepository(db)
         self.catalogo = CatalogoHotelRepository(mongo_db)
 
@@ -31,7 +35,23 @@ class CatalogoHotelService:
                 f"Nao existe hotel com id '{hotel_id}'."
             )
 
-        documento = self._montar_documento(hotel)
+        resultado = (
+            self.db.query(
+                func.avg(Avaliacao.nota),
+                func.count(Avaliacao.id),
+            )
+            .filter(Avaliacao.hotel_id == hotel_id)
+            .first()
+        )
+
+        media = float(resultado[0]) if resultado and resultado[0] is not None else 0.0
+        quantidade = resultado[1] if resultado else 0
+
+        documento = self._montar_documento(
+            hotel,
+            media_avaliacoes=round(media, 2),
+            quantidade_avaliacoes=quantidade,
+        )
 
         await self.catalogo.substituir_hotel(
             hotel_id=str(hotel.id),
@@ -49,11 +69,17 @@ class CatalogoHotelService:
         )
 
     @staticmethod
-    def _montar_documento(hotel: Any) -> dict[str, Any]:
+    def _montar_documento(
+        hotel: Any,
+        media_avaliacoes: float = 0.0,
+        quantidade_avaliacoes: int = 0,
+    ) -> dict[str, Any]:
         return {
             "hotel_id": str(hotel.id),
             "nome": hotel.nome,
             "categoria_estrelas": hotel.categoria_estrelas,
+            "media_avaliacoes": media_avaliacoes,
+            "quantidade_avaliacoes": quantidade_avaliacoes,
             "cidade": {
                 "id": str(hotel.cidade.id),
                 "nome": hotel.cidade.nome,

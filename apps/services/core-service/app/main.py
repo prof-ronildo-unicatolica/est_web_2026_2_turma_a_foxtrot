@@ -18,6 +18,7 @@ from app.core.database import SessionLocal
 from app.core.seed_mongo import seed_mongo_users
 from app.models.hotel import Hotel
 from app.services.catalogo_hotel_service import CatalogoHotelService
+from app.api.v1.avaliacoes import router as avaliacoes_router
 
 
 @asynccontextmanager
@@ -80,7 +81,7 @@ app.include_router(hoteis_router, prefix=settings.API_V1_STR)
 app.include_router(comodidades_router, prefix=settings.API_V1_STR)
 app.include_router(quartos_router, prefix=settings.API_V1_STR)
 app.include_router(reservas_router, prefix=settings.API_V1_STR)
-
+app.include_router(avaliacoes_router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 def read_root():
