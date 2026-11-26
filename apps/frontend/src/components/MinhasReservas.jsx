@@ -124,7 +124,34 @@ export default function MinhasReservas() {
   const [quartosPorId, setQuartosPorId] = useState({})
   const [avaliacaoAbertaId, setAvaliacaoAbertaId] = useState(null)
   const [enviandoAvaliacaoId, setEnviandoAvaliacaoId] = useState(null)
-  const [avaliadasNestaSessao, setAvaliadasNestaSessao] = useState([])
+  const [avaliadasNestaSessao, setAvaliadasNestaSessao] = useState(() => {
+    try {
+      const salvas = JSON.parse(
+        localStorage.getItem('foxtrot_avaliacoes_registradas') || '[]'
+      )
+
+      return Array.isArray(salvas)
+        ? salvas.filter((id) => typeof id === 'string')
+        : []
+    } catch {
+      return []
+    }
+  })
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        'foxtrot_avaliacoes_registradas',
+        JSON.stringify(avaliadasNestaSessao)
+      )
+    } catch (erro) {
+      console.warn(
+        'Não foi possível salvar as avaliações neste navegador.',
+        erro
+      )
+    }
+  }, [avaliadasNestaSessao])
+
 
 
   useEffect(() => {
@@ -295,11 +322,24 @@ export default function MinhasReservas() {
 
       setAvaliacaoAbertaId(null)
       setSucesso('Sua avaliação foi registrada com sucesso.')
+
     } catch (falha) {
-      setErroAcao(
-        falha.message || 'Não foi possível registrar sua avaliação.'
-      )
-    } finally {
+      const mensagem = falha.message || ''
+
+      if (/esta reserva j[aá] possui uma avalia[cç][aã]o/i.test(mensagem)) {
+        setAvaliadasNestaSessao((anteriores) => [
+          ...new Set([...anteriores, reservaId]),
+        ])
+
+        setAvaliacaoAbertaId(null)
+        setSucesso('Esta reserva já foi avaliada anteriormente.')
+      } else {
+        setErroAcao(
+          mensagem || 'Não foi possível registrar sua avaliação.'
+        )
+      }
+    }
+    finally {
       setEnviandoAvaliacaoId(null)
     }
   }
@@ -332,11 +372,20 @@ export default function MinhasReservas() {
               </div>
             )}
 
+
             {sucesso && (
-              <div className="alert alert-success" role="status">
+              <div
+                className={`alert ${
+                  sucesso === 'Esta reserva já foi avaliada anteriormente.'
+                    ? 'alert-warning'
+                    : 'alert-success'
+                }`}
+                role="status"
+              >
                 {sucesso}
               </div>
             )}
+
 
             {carregando ? (
               <div className="text-center py-4">
