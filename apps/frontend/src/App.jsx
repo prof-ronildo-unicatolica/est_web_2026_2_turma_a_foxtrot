@@ -577,6 +577,17 @@ function HomePage() {
                                       }{' '}
                                       estrelas
                                     </p>
+
+                                    <p className="mb-2">
+                                      <strong>Avaliação dos hóspedes:</strong>{' '}
+                                      {Number(hotel.quantidade_avaliacoes) > 0
+                                        ? `${Number(hotel.media_avaliacoes).toLocaleString('pt-BR', {
+                                            minimumFractionDigits: 1,
+                                            maximumFractionDigits: 2,
+                                          })}/5 (${hotel.quantidade_avaliacoes} avaliações)`
+                                        : 'Ainda sem avaliações'}
+                                    </p>
+
                                     {hotel.cidade && (
                                       <p className="text-secondary mb-3">
                                         <strong>
@@ -638,6 +649,17 @@ function HomePage() {
                       )}
                     </span>
                   </p>
+
+                  <p className="mb-2">
+                    <strong>Avaliação dos hóspedes:</strong>{' '}
+                    {Number(hotelSelecionado.quantidade_avaliacoes) > 0
+                      ? `${Number(hotelSelecionado.media_avaliacoes).toLocaleString('pt-BR', {
+                          minimumFractionDigits: 1,
+                          maximumFractionDigits: 2,
+                        })}/5 (${hotelSelecionado.quantidade_avaliacoes} avaliações)`
+                      : 'Ainda sem avaliações'}
+                  </p>
+
                   {hotelSelecionado.cidade && (
                     <p className="text-secondary">
                       <strong>
