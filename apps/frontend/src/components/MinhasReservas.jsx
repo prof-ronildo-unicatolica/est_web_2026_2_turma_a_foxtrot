@@ -1,4 +1,5 @@
-
+import FormularioAvaliacao from './FormularioAvaliacao'
+import { criarAvaliacao } from '../services/avaliacoes'
 import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import {
@@ -121,6 +122,37 @@ export default function MinhasReservas() {
   const [sucesso, setSucesso] = useState('')
   const [cancelandoId, setCancelandoId] = useState(null)
   const [quartosPorId, setQuartosPorId] = useState({})
+  const [avaliacaoAbertaId, setAvaliacaoAbertaId] = useState(null)
+  const [enviandoAvaliacaoId, setEnviandoAvaliacaoId] = useState(null)
+  const [avaliadasNestaSessao, setAvaliadasNestaSessao] = useState(() => {
+    try {
+      const salvas = JSON.parse(
+        localStorage.getItem('foxtrot_avaliacoes_registradas') || '[]'
+      )
+
+      return Array.isArray(salvas)
+        ? salvas.filter((id) => typeof id === 'string')
+        : []
+    } catch {
+      return []
+    }
+  })
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        'foxtrot_avaliacoes_registradas',
+        JSON.stringify(avaliadasNestaSessao)
+      )
+    } catch (erro) {
+      console.warn(
+        'Não foi possível salvar as avaliações neste navegador.',
+        erro
+      )
+    }
+  }, [avaliadasNestaSessao])
+
+
 
   useEffect(() => {
     let ativo = true
@@ -258,6 +290,61 @@ export default function MinhasReservas() {
     }
   }
 
+  async function handleEnviarAvaliacao(reservaId, dadosAvaliacao) {
+    const token = localStorage.getItem('access_token')
+
+    setErroAcao('')
+    setSucesso('')
+
+    if (!token) {
+      setErroAcao('Sua sessão expirou. Faça login novamente.')
+      return
+    }
+
+    if (enviandoAvaliacaoId !== null) return
+
+    setEnviandoAvaliacaoId(reservaId)
+
+    try {
+      await criarAvaliacao(
+        {
+          reserva_id: reservaId,
+          nota: dadosAvaliacao.nota,
+          comentario: dadosAvaliacao.comentario,
+        },
+        token
+      )
+
+      setAvaliadasNestaSessao((anteriores) => [
+        ...anteriores,
+        reservaId,
+      ])
+
+      setAvaliacaoAbertaId(null)
+      setSucesso('Sua avaliação foi registrada com sucesso.')
+
+    } catch (falha) {
+      const mensagem = falha.message || ''
+
+      if (/esta reserva j[aá] possui uma avalia[cç][aã]o/i.test(mensagem)) {
+        setAvaliadasNestaSessao((anteriores) => [
+          ...new Set([...anteriores, reservaId]),
+        ])
+
+        setAvaliacaoAbertaId(null)
+        setSucesso('Esta reserva já foi avaliada anteriormente.')
+      } else {
+        setErroAcao(
+          mensagem || 'Não foi possível registrar sua avaliação.'
+        )
+      }
+    }
+    finally {
+      setEnviandoAvaliacaoId(null)
+    }
+  }
+
+
   return (
     <div className="bg-light min-vh-100 py-5">
       <div className="container">
@@ -285,11 +372,20 @@ export default function MinhasReservas() {
               </div>
             )}
 
+
             {sucesso && (
-              <div className="alert alert-success" role="status">
+              <div
+                className={`alert ${
+                  sucesso === 'Esta reserva já foi avaliada anteriormente.'
+                    ? 'alert-warning'
+                    : 'alert-success'
+                }`}
+                role="status"
+              >
                 {sucesso}
               </div>
             )}
+
 
             {carregando ? (
               <div className="text-center py-4">
@@ -318,6 +414,15 @@ export default function MinhasReservas() {
               <div className="row g-3">
                 {reservasExibidas.map((reserva) => {
                   const quarto = quartosPorId[reserva.quarto_id]
+
+                  const dataCheckout = String(reserva.data_checkout || '').slice(0, 10)
+
+                  const podeAvaliar =
+                    reserva.status === 'Confirmada' &&
+                    Boolean(dataCheckout) &&
+                    dataCheckout < obterDataLocal() &&
+                    !avaliadasNestaSessao.includes(reserva.id)
+
 
                   const prazo = calcularPrazoCancelamento(reserva)
                   const multa = calcularMultaExibida(reserva, quarto)
@@ -429,6 +534,34 @@ export default function MinhasReservas() {
                               Esta reserva já foi cancelada.
                             </p>
                           )}
+
+                          {podeAvaliar && (
+                            <div className="mt-3 pt-3 border-top">
+                              {avaliacaoAbertaId === reserva.id ? (
+                                <FormularioAvaliacao
+                                  enviando={enviandoAvaliacaoId === reserva.id}
+                                  onEnviar={(dados) =>
+                                    handleEnviarAvaliacao(reserva.id, dados)
+                                  }
+                                  onCancelar={() => setAvaliacaoAbertaId(null)}
+                                />
+                              ) : (
+                                <button
+                                  type="button"
+                                  className="btn btn-outline-primary"
+                                  disabled={enviandoAvaliacaoId !== null}
+                                  onClick={() => {
+                                    setErroAcao('')
+                                    setSucesso('')
+                                    setAvaliacaoAbertaId(reserva.id)
+                                  }}
+                                >
+                                  ⭐ Avaliar Estadia
+                                </button>
+                              )}
+                            </div>
+                          )}
+
                         </div>
                       </div>
                     </div>
